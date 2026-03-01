@@ -1,56 +1,43 @@
-🚀 Project Name
-
-A brief description of what this C# application does and its main purpose.
+🚀 Amarasinghe Hardware Management System
+A comprehensive, cross-platform Point of Sale (POS) and Inventory Management System designed specifically to digitize hardware store operations. This application replaces manual "CR Book" ledgers with a secure, automated digital ecosystem that handles daily sales, dynamic supply chain tracking, and financial reporting.
 
 ✨ Features
+🔐 User Authentication: Secure, role-based access control separating Admin/Manager permissions from Cashier duties.
 
-🔐 User Authentication
+🛒 Smart POS Checkout: Real-time cart management, dynamic line discounts, and automated grand total calculations.
 
-📂 File Handling
+🗄️ Advanced Inventory & Batching: Tracks stock using FIFO (First-In, First-Out) logic, monitors expiry dates, and calculates exact profit margins based on specific batch cost prices.
 
-🗄️ Database Integration
+💳 Debtor Management: Dedicated finance module to register credit customers, issue credit bills, and track debt settlements.
 
-📊 Report Generation
+📊 Report Generation: Automated PDF exports for daily sales, revenue tracking, and outstanding debtor balances.
 
-🖥️ User-Friendly Interface
+🖥️ User-Friendly Interface: Clean, intuitive dashboard designed for fast-paced retail checkout environments.
 
 🛠️ Technologies Used
+💻 C# (Core backend logic)
 
-💻 C#
+🧩 .NET Framework * 🏗️ Microsoft Visual Studio (IDE)
 
-🧩 .NET Framework
+🗄️ SQL Server (Relational Database Management)
 
-🏗️ Microsoft Visual Studio
-
-🗄️ SQL Server (if applicable)
-
-🎨 Windows Forms / WPF (if applicable)
+🎨 Windows Forms (UI/UX Design)
 
 📂 Project Structure
-/ProjectName
- ├── Forms
- ├── Models
- ├── Database
- ├── Program.cs
- └── App.config
 ⚙️ How to Run
+📥 Clone the repository:
 
-📥 Clone the repository
+🖥️ Open the solution file: Locate and open the .sln file in Microsoft Visual Studio.
 
-git clone https://github.com/yourusername/projectname.git
+🗄️ Configure the Database: Open the App.config file and update the SQL Server Connection String to match your local server environment.
 
-🖥️ Open the solution file (.sln) in Visual Studio
-
-▶️ Click Start or press F5
-
-✅ Ensure SQL Server connection string is configured (if using database)
+▶️ Run the App: Click Start or press F5 to build and launch the application.
 
 🎯 Project Objectives
+Improve retail application usability for non-technical hardware store staff.
 
-Improve application usability
+Apply Object-Oriented Programming (OOP) concepts to handle complex inventory logic.
 
-Apply Object-Oriented Programming concepts
+Implement secure data management with structured relational database architecture.
 
-Implement secure data management
-
-Follow structured software development practices
+Follow Agile software development practices and structured version control.
