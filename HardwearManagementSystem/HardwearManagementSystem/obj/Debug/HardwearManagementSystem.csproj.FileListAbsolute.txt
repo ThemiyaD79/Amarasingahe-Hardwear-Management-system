@@ -1,0 +1,5 @@
+C:\Users\dhine\Documents\GitHub\Amarasingahe-Hardwear-Management-system\HardwearManagementSystem\HardwearManagementSystem\obj\Debug\HardwearManagementSystem.csproj.AssemblyReference.cache
+C:\Users\dhine\Documents\GitHub\Amarasingahe-Hardwear-Management-system\HardwearManagementSystem\HardwearManagementSystem\obj\Debug\HardwareManagementSystem.LoginForm.resources
+C:\Users\dhine\Documents\GitHub\Amarasingahe-Hardwear-Management-system\HardwearManagementSystem\HardwearManagementSystem\obj\Debug\HardwearManagementSystem.Properties.Resources.resources
+C:\Users\dhine\Documents\GitHub\Amarasingahe-Hardwear-Management-system\HardwearManagementSystem\HardwearManagementSystem\obj\Debug\HardwearManagementSystem.csproj.GenerateResource.cache
+C:\Users\dhine\Documents\GitHub\Amarasingahe-Hardwear-Management-system\HardwearManagementSystem\HardwearManagementSystem\obj\Debug\HardwearManagementSystem.csproj.CoreCompileInputs.cache
