@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace HardwearManagementSystem.Properties
+namespace HardwareManagementSystem.Properties
 {
 
 
