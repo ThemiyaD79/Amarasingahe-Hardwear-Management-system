@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
-using System.Windows.Forms;
+using System.Windows;
 
 namespace HardwareManagementSystem.Database
 {
     public static class DbConnection
     {
-        // This reaches into your App.config and grabs the string safely!
         private static string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
 
         public static SqlConnection GetConnection()
@@ -19,7 +18,7 @@ namespace HardwareManagementSystem.Database
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Database Connection Failed: " + ex.Message, "System Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Database Connection Failed: " + ex.Message, "System Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }
