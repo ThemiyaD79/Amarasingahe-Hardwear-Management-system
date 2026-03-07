@@ -23,3 +23,40 @@ When generating XAML, always use standard camelCase prefixes for x:Name:
 
 ## 4. Current State
 * **Completed:** WPF Migration, Database Connection, Login UI (`MainWindow.xaml`), Login Backend logic with Role-based routing (Manager vs. Cashier).
+Class: StaffManagement (The Main Dashboard Screen)
+dgStaff: The main DataGrid table. We use this in C# to display the list of database rows and to figure out which user row was clicked.
+
+btnAddStaff: The green button. Clicks trigger the empty pop-up to add a new user.
+
+btnUpdateStaff: The orange button. Clicks trigger the pop-up and send it the dgStaff's currently selected row.
+
+btnDeleteStaff: The red button. Clicks will eventually trigger a SQL DELETE query.
+
+txtSearch: The grey search bar. We use this to grab the text the user types (e.g., "Manager") to filter the grid.
+
+btnSearch: The button that executes the search filter using the text from txtSearch.
+
+Class: StaffDetailsWindow (The Pop-Up Data Entry Form)
+txtFullName: TextBox to type or read the staff member's full name.
+
+txtNIC: TextBox for the National Identity Card number.
+
+txtPhone: TextBox for the phone number.
+
+txtUsername: TextBox for the system login username.
+
+txtPassword: A special PasswordBox that hides the characters with dots when the user types their login password.
+
+cmbRole: The ComboBox (Dropdown). We use this to grab the selected role (Manager, Cashier, Admin).
+
+txtSalary: TextBox for the numeric salary amount.
+
+txtAge: TextBox for the numeric age.
+
+dpStartingDate: The DatePicker control. We use this to grab the exact calendar date selected.
+
+chkIsActive: The CheckBox. We use this to check if it's True (active account) or False (disabled account).
+
+btnSave: The main green save button. Clicking this will trigger the database INSERT or UPDATE query.
+
+btnCancel: The grey cancel button. Closes the pop-up without doing anything.
