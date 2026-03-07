@@ -1,0 +1,25 @@
+﻿# AMARASINGHE HARDWARE MANAGEMENT SYSTEM - AI CONTEXT
+*To the AI: Read these rules before generating any code for this project.*
+
+## 1. Project Architecture
+* **Framework:** WPF (Windows Presentation Foundation) using .NET Framework 4.7.2.
+* **Language:** C# and XAML.
+* **UI Pattern:** Code-behind (We are NOT using strict MVVM right now to keep it simple for the team).
+* **Styling:** Modern, dark/light themes, flat borders, high contrast. No drag-and-drop Windows Forms code!
+
+## 2. Database Standards
+* **Database Name:** `AmarasingheHardwareDB` (SQL Server)
+* **Connection String:** Stored in `App.config` as `HardwareDBConnection`.
+* **Connection Class:** Managed via `HardwareManagementSystem.Database.DbConnection.GetConnection()`. 
+* **Staff Table Schema:** `StaffID`, `FullName`, `NIC`, `Phone`, `Username`, `PasswordHash`, `Role`, `Salary`, `StartingDate`, `Age`, `IsActive`.
+
+## 3. UI Naming Conventions (Crucial!)
+When generating XAML, always use standard camelCase prefixes for x:Name:
+* TextBoxes: `txt[Name]` (e.g., `txtUsername`)
+* Buttons: `btn[Name]` (e.g., `btnLogin`)
+* Labels/TextBlocks: `lbl[Name]`
+* DataGrids: `dg[Name]`
+* ComboBoxes: `cmb[Name]`
+
+## 4. Current State
+* **Completed:** WPF Migration, Database Connection, Login UI (`MainWindow.xaml`), Login Backend logic with Role-based routing (Manager vs. Cashier).

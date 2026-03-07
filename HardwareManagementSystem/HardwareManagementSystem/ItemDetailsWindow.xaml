@@ -1,0 +1,69 @@
+﻿<Window x:Class="HardwareManagementSystem.ItemDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Item Details" Height="450" Width="400"
+        WindowStartupLocation="CenterScreen" Background="#111827"
+        ResizeMode="NoResize">
+
+    <Border Padding="25">
+        <StackPanel>
+            <TextBlock Text="Item Details" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+            <TextBlock Text="Item Name:" Foreground="#9CA3AF" FontSize="14" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtItemName" Height="35" Background="#374151" Foreground="White" 
+                     BorderThickness="0" Padding="10,0,0,0" VerticalContentAlignment="Center" Margin="0,0,0,15"/>
+
+            <TextBlock Text="Category:" Foreground="#9CA3AF" FontSize="14" Margin="0,0,0,5"/>
+            <ComboBox x:Name="cmbCategory" Height="35" Margin="0,0,0,15" FontSize="14" VerticalContentAlignment="Center"/>
+
+            <Grid Margin="0,0,0,30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Quantity:" Foreground="#9CA3AF" FontSize="14" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtQuantity" Height="35" Background="#374151" Foreground="White" 
+                             BorderThickness="0" Padding="10,0,0,0" VerticalContentAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Unit Price (Rs):" Foreground="#9CA3AF" FontSize="14" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtPrice" Height="35" Background="#374151" Foreground="White" 
+                             BorderThickness="0" Padding="10,0,0,0" VerticalContentAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnCancel" Grid.Column="0" Content="Cancel" Height="40" 
+                        Background="#4B5563" Foreground="White" FontWeight="Bold" BorderThickness="0" 
+                        Cursor="Hand" Click="btnCancel_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button x:Name="btnSave" Grid.Column="2" Content="Save Item" Height="40" 
+                        Background="#10B981" Foreground="White" FontWeight="Bold" BorderThickness="0" 
+                        Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </Grid>
+
+        </StackPanel>
+    </Border>
+</Window>

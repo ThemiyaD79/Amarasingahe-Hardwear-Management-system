@@ -41,3 +41,4 @@ Apply Object-Oriented Programming (OOP) concepts to handle complex inventory log
 Implement secure data management with structured relational database architecture.
 
 Follow Agile software development practices and structured version control.
+
