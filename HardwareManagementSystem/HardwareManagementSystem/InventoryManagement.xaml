@@ -51,7 +51,7 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <Button x:Name="btnAddItem" Content="+ Add New Item" Width="150" Height="40" 
                         Background="#10B981" Foreground="White" FontWeight="Bold" BorderThickness="0" 
-                        Cursor="Hand" Margin="0,0,10,0">
+                        Cursor="Hand" Margin="0,0,10,0" Click="btnAddItem_Click">
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius" Value="5"/>
@@ -61,7 +61,7 @@
 
                 <Button x:Name="btnUpdateItem" Content="Update Selected" Width="150" Height="40" 
                         Background="#F59E0B" Foreground="White" FontWeight="Bold" BorderThickness="0" 
-                        Cursor="Hand" Margin="0,0,10,0">
+                        Cursor="Hand" Margin="0,0,10,0" Click="btnUpdateItem_Click">
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius" Value="5"/>
@@ -71,7 +71,7 @@
 
                 <Button x:Name="btnDeleteItem" Content="Delete Selected" Width="150" Height="40" 
                         Background="#EF4444" Foreground="White" FontWeight="Bold" BorderThickness="0" 
-                        Cursor="Hand">
+                        Cursor="Hand" Click="btnDeleteItem_Click">
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius" Value="5"/>
@@ -92,7 +92,7 @@
 
             <Button x:Name="btnSearch" Grid.Column="5" Content="Search" Width="80" Height="40" 
                     Background="#6B7280" Foreground="White" BorderThickness="0" 
-                    Cursor="Hand" Margin="5,0,0,0">
+                    Cursor="Hand" Margin="5,0,0,0" Click="btnSearch_Click">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="5"/>

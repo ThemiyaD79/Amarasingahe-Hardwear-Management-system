@@ -49,7 +49,16 @@ namespace HardwareManagementSystem
                                 }
 
                                 string role = reader["Role"].ToString();
-                                MessageBox.Show($"Welcome to Amarasinghe Hardware!\nLogged in as: {role}", "Login Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                                // === NEW NAVIGATION LOGIC ===
+                                // 1. Create the Main Dashboard Window
+                                MainDashboard dashboard = new MainDashboard();
+
+                                // 2. Open the Dashboard
+                                dashboard.Show();
+
+                                // 3. Close the Login Window so it doesn't stay open in the background
+                                this.Close();
                             }
                             else
                             {
