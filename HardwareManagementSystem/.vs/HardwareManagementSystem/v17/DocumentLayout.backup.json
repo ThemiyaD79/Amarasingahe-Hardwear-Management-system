@@ -1,0 +1,213 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\hardwaremanagementsystem\\inventorymanagement.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\inventorymanagement.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|c:\\users\\dhine\\documents\\github\\amarasingahe-hardwear-management-system\\hardwaremanagementsystem\\hardwaremanagementsystem\\inventorymanagement.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\inventorymanagement.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\hardwaremanagementsystem\\itemdetailswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\itemdetailswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\hardwaremanagementsystem\\itemdetailswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\itemdetailswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|c:\\users\\dhine\\documents\\github\\amarasingahe-hardwear-management-system\\hardwaremanagementsystem\\hardwaremanagementsystem\\models\\productmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\models\\productmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|c:\\users\\dhine\\documents\\github\\amarasingahe-hardwear-management-system\\hardwaremanagementsystem\\hardwaremanagementsystem\\maindashboard.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\maindashboard.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|c:\\users\\dhine\\documents\\github\\amarasingahe-hardwear-management-system\\hardwaremanagementsystem\\hardwaremanagementsystem\\maindashboard.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\maindashboard.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\hardwaremanagementsystem\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\hardwaremanagementsystem\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\hardwaremanagementsystem\\ai_context.md.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\ai_context.md.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\hardwaremanagementsystem\\database\\dbconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EF2AE67-1692-4341-A0EC-6000BC9B2E61}|HardwareManagementSystem\\HardwareManagementSystem.csproj|solutionrelative:hardwaremanagementsystem\\database\\dbconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "InventoryManagement.xaml",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\InventoryManagement.xaml",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\InventoryManagement.xaml",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\InventoryManagement.xaml",
+              "RelativeToolTip": "HardwareManagementSystem\\InventoryManagement.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-07T09:12:13.49Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ItemDetailsWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\ItemDetailsWindow.xaml.cs",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\ItemDetailsWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\ItemDetailsWindow.xaml.cs",
+              "RelativeToolTip": "HardwareManagementSystem\\ItemDetailsWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-07T09:45:40.397Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ItemDetailsWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\ItemDetailsWindow.xaml",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\ItemDetailsWindow.xaml",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\ItemDetailsWindow.xaml",
+              "RelativeToolTip": "HardwareManagementSystem\\ItemDetailsWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-07T09:41:39.682Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "InventoryManagement.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\InventoryManagement.xaml.cs",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\InventoryManagement.xaml.cs",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\InventoryManagement.xaml.cs",
+              "RelativeToolTip": "HardwareManagementSystem\\InventoryManagement.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-07T09:51:41.049Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ProductModel.cs",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\Models\\ProductModel.cs",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\Models\\ProductModel.cs",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\Models\\ProductModel.cs",
+              "RelativeToolTip": "HardwareManagementSystem\\Models\\ProductModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-07T12:24:53.029Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MainDashboard.xaml",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\MainDashboard.xaml",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\MainDashboard.xaml",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\MainDashboard.xaml",
+              "RelativeToolTip": "HardwareManagementSystem\\MainDashboard.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-07T10:05:30.976Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\MainWindow.xaml.cs",
+              "RelativeToolTip": "HardwareManagementSystem\\MainWindow.xaml.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAAAEwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T06:26:09.141Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MainDashboard.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\MainDashboard.xaml.cs",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\MainDashboard.xaml.cs",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\MainDashboard.xaml.cs",
+              "RelativeToolTip": "HardwareManagementSystem\\MainDashboard.xaml.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAAABsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-07T10:24:35.946Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\MainWindow.xaml",
+              "RelativeToolTip": "HardwareManagementSystem\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-06T06:26:10.56Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AI_CONTEXT.md.txt",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\AI_CONTEXT.md.txt",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\AI_CONTEXT.md.txt",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\AI_CONTEXT.md.txt",
+              "RelativeToolTip": "HardwareManagementSystem\\AI_CONTEXT.md.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2026-03-06T08:06:14.991Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "DbConnection.cs",
+              "DocumentMoniker": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\Database\\DbConnection.cs",
+              "RelativeDocumentMoniker": "HardwareManagementSystem\\Database\\DbConnection.cs",
+              "ToolTip": "C:\\Users\\dhine\\Documents\\GitHub\\Amarasingahe-Hardwear-Management-system\\HardwareManagementSystem\\HardwareManagementSystem\\Database\\DbConnection.cs",
+              "RelativeToolTip": "HardwareManagementSystem\\Database\\DbConnection.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-06T06:28:34.78Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
