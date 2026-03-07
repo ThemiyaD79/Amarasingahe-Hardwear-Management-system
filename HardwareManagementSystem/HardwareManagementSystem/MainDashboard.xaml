@@ -44,9 +44,12 @@
                            HorizontalAlignment="Center" Margin="0,10,0,40"/>
 
                 <Button Content="Home" Style="{StaticResource SidebarButton}" x:Name="btnHomeNav"/>
-                <Button Content="Staff" Style="{StaticResource SidebarButton}" x:Name="btnStaffNav"/>
+                <Button Content="Staff" Style="{StaticResource SidebarButton}" x:Name="btnStaffNav" Click="btnStaffNav_Click"/>
                 <Button Content="Inventory" Style="{StaticResource SidebarButton}" x:Name="btnInventoryNav" Click="btnInventoryNav_Click"/>
                 <Button Content="Sales" Style="{StaticResource SidebarButton}" x:Name="btnSalesNav"/>
+
+                <Button Content="Cashier Dashboard" Style="{StaticResource SidebarButton}" x:Name="btnCashierNav" Click="btnCashierNav_Click"/>
+
                 <Button Content="Reports" Style="{StaticResource SidebarButton}" x:Name="btnReportsNav"/>
                 <Button Content="Settings" Style="{StaticResource SidebarButton}" x:Name="btnSettingsNav"/>
 

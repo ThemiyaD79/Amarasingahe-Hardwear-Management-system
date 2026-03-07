@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\dhine\Documents\GitHub\Amarasingahe-Hardwear-Management-system\HardwareManagementSystem\HardwareManagementSystem\App.xaml
-4420826514
+71176451196
 1-557625303
-111495669801
+15357996690
 14-207034072
-InventoryManagement.xaml;ItemDetailsWindow.xaml;MainDashboard.xaml;MainWindow.xaml;
+CashierDashboard.xaml;InventoryManagement.xaml;ItemDetailsWindow.xaml;MainDashboard.xaml;MainWindow.xaml;StaffDetailsWindow.xaml;StaffManagement.xaml;
 
-False
+True
 
