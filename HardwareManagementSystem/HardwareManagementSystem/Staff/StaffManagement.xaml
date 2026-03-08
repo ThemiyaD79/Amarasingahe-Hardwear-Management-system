@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Staff Management" Height="800" Width="1200"
-        WindowStartupLocation="CenterScreen" Background="#111827">
+        WindowStartupLocation="CenterScreen"
+        Background="#111827">
 
     <Window.Resources>
         <Style x:Key="ModernDataGrid" TargetType="DataGrid">
@@ -17,6 +18,7 @@
             <Setter Property="HeadersVisibility" Value="Column"/>
             <Setter Property="IsReadOnly" Value="True"/>
         </Style>
+
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#374151"/>
             <Setter Property="Foreground" Value="#9CA3AF"/>
@@ -27,17 +29,42 @@
     </Window.Resources>
 
     <Grid Margin="30">
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <!-- Back + Header -->
             <RowDefinition Height="Auto"/>
+            <!-- Buttons + Search -->
             <RowDefinition Height="*"/>
+            <!-- DataGrid -->
         </Grid.RowDefinitions>
 
+        <!-- BACK BUTTON + HEADER -->
         <StackPanel Grid.Row="0" Margin="0,0,0,25">
-            <TextBlock Text="MANAGEMENT / STAFF" Foreground="#9CA3AF" FontSize="12" FontWeight="Bold"/>
-            <TextBlock Text="System Users" Foreground="White" FontSize="28" FontWeight="Bold" Margin="0,5,0,0"/>
+            <Button x:Name="btnBack"
+                    Content="← Back"
+                    Width="100"
+                    Height="35"
+                    Background="#6B7280"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Click="btnBack_Click"
+                    Margin="0,0,0,10"/>
+
+            <TextBlock Text="MANAGEMENT / STAFF"
+                       Foreground="#9CA3AF"
+                       FontSize="12"
+                       FontWeight="Bold"/>
+            <TextBlock Text="System Users"
+                       Foreground="White"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       Margin="0,5,0,0"/>
         </StackPanel>
 
+        <!-- Buttons + Search -->
         <Grid Grid.Row="1" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -47,54 +74,37 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button x:Name="btnAddStaff" Content="+ Add New Staff" Width="150" Height="40" 
-                        Background="#10B981" Foreground="White" FontWeight="Bold" BorderThickness="0" 
-                        Cursor="Hand" Margin="0,0,10,0" Click="btnAddStaff_Click">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="6"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
+                <Button x:Name="btnAddStaff" Content="+ Add New Staff" Width="150" Height="40"
+                        Background="#10B981" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                        Cursor="Hand" Margin="0,0,10,0" Click="btnAddStaff_Click"/>
 
-                <Button x:Name="btnUpdateStaff" Content="Update Selected" Width="150" Height="40" 
-                        Background="#F59E0B" Foreground="White" FontWeight="Bold" BorderThickness="0" 
-                        Cursor="Hand" Margin="0,0,10,0" Click="btnUpdateStaff_Click">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="6"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
+                <Button x:Name="btnUpdateStaff" Content="Update Selected" Width="150" Height="40"
+                        Background="#F59E0B" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                        Cursor="Hand" Margin="0,0,10,0" Click="btnUpdateStaff_Click"/>
 
-                <Button x:Name="btnDeleteStaff" Content="Delete Selected" Width="150" Height="40" 
-                        Background="#EF4444" Foreground="White" FontWeight="Bold" BorderThickness="0" 
-                        Cursor="Hand" Click="btnDeleteStaff_Click">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="6"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
+                <Button x:Name="btnDeleteStaff" Content="Delete Selected" Width="150" Height="40"
+                        Background="#EF4444" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                        Cursor="Hand" Margin="0,0,10,0" Click="btnDeleteStaff_Click"/>
+
+                <Button x:Name="btnViewAll" Content="View All" Width="120" Height="40"
+                        Background="#3B82F6" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                        Cursor="Hand" Click="btnViewAll_Click"/>
             </StackPanel>
 
-            <TextBox x:Name="txtSearch" Grid.Column="2" Width="250" Height="40" Background="#374151" 
-                     Foreground="White" FontSize="14" BorderThickness="0" 
-                     VerticalContentAlignment="Center" Padding="15,0,0,0" />
+            <TextBox x:Name="txtSearch" Grid.Column="2" Width="250" Height="40"
+                     Background="#374151" Foreground="White" FontSize="14" BorderThickness="0"
+                     VerticalContentAlignment="Center" Padding="15,0,0,0"/>
 
-            <Button x:Name="btnSearch" Grid.Column="3" Content="Search" Width="90" Height="40" 
-                    Background="#6B7280" Foreground="White" BorderThickness="0" 
-                    Cursor="Hand" Margin="10,0,0,0" Click="btnSearch_Click">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="6"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
+            <Button x:Name="btnSearch" Grid.Column="3" Content="Search" Width="90" Height="40"
+                    Background="#6B7280" Foreground="White" BorderThickness="0"
+                    Cursor="Hand" Margin="10,0,0,0" Click="btnSearch_Click"/>
         </Grid>
 
-        <DataGrid x:Name="dgStaff" Grid.Row="2" Style="{StaticResource ModernDataGrid}" 
-                  AutoGenerateColumns="False" SelectionMode="Single">
+        <!-- DataGrid -->
+        <DataGrid x:Name="dgStaff" Grid.Row="2"
+                  Style="{StaticResource ModernDataGrid}"
+                  AutoGenerateColumns="False"
+                  SelectionMode="Single">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding StaffID}" Width="60"/>
                 <DataGridTextColumn Header="FULL NAME" Binding="{Binding FullName}" Width="2*"/>

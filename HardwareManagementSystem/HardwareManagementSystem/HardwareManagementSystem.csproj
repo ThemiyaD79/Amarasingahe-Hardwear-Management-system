@@ -56,22 +56,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Inventory\InventoryManagement.xaml">
-    <Compile Include="CashierDashboard.xaml.cs">
-      <DependentUpon>CashierDashboard.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Models\StaffModel.cs" />
-    <Compile Include="StaffDetailsWindow.xaml.cs">
-      <DependentUpon>StaffDetailsWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="StaffManagement.xaml.cs">
-      <DependentUpon>StaffManagement.xaml</DependentUpon>
-    </Compile>
     <Page Include="CashierDashboard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="InventoryManagement.xaml">
+    <Page Include="Inventory\InventoryManagement.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -91,12 +80,30 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Staff\StaffDetailsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Staff\StaffManagement.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Staff\UpdateStaffDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CashierDashboard.xaml.cs">
+      <DependentUpon>CashierDashboard.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Database\DbConnection.cs" />
     <Compile Include="Data\ProductRepository.cs" />
+    <Compile Include="Data\StaffRepository.cs" />
     <Compile Include="Inventory\CategoryFilter.cs" />
     <Compile Include="Inventory\InventoryManagement.xaml.cs">
       <DependentUpon>InventoryManagement.xaml</DependentUpon>
@@ -115,17 +122,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="StaffDetailsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="StaffManagement.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Models\ProductModel.cs" />
+    <Compile Include="Models\StaffModel.cs" />
+    <Compile Include="Staff\StaffDetailsWindow.xaml.cs">
+      <DependentUpon>StaffDetailsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Staff\StaffManagement.xaml.cs">
+      <DependentUpon>StaffManagement.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -139,6 +143,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Staff\UpdateStaffDetails.xaml.cs">
+      <DependentUpon>UpdateStaffDetails.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -147,15 +156,10 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AI_CONTEXT.md.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="StaffManagement\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
