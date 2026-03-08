@@ -7,18 +7,19 @@ namespace HardwareManagementSystem.Database
 {
     public static class DbConnection
     {
-        private static string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
-
         public static SqlConnection GetConnection()
         {
             try
             {
+                // This magically grabs the exact string from your App.config file!
+                string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
+
                 SqlConnection conn = new SqlConnection(connectionString);
                 return conn;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Database Connection Failed: " + ex.Message, "System Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Failed to read database connection: " + ex.Message, "Configuration Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }
