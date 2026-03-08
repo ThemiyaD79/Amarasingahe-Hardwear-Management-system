@@ -131,5 +131,8 @@
   <ItemGroup>
     <Content Include="AI_CONTEXT.md.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="StaffManagement\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
