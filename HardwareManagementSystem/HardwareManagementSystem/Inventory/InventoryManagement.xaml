@@ -33,11 +33,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,25">
             <TextBlock Text="MANAGEMENT / INVENTORY" Foreground="#9CA3AF" FontSize="12"/>
             <TextBlock Text="Inventory Items" Foreground="White" FontSize="28" FontWeight="Bold"/>
         </StackPanel>
 
+        <!-- Controls -->
         <Grid Grid.Row="1" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -80,29 +82,42 @@
                 </Button>
             </StackPanel>
 
-            <TextBlock Grid.Column="2" Text="Category:" Foreground="#9CA3AF" FontSize="14" 
-                       VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <!-- Filters -->
+            <TextBlock Grid.Column="3" Text="Category:" Foreground="#9CA3AF" FontSize="14" 
+                       VerticalAlignment="Top" Margin="46,-24,61,0"/>
 
             <ComboBox x:Name="cmbCategoryFilter" Grid.Column="3" Width="150" Height="40" 
                       Margin="0,0,15,0" FontSize="14" VerticalContentAlignment="Center"/>
 
+            <!-- Search & View All -->
             <TextBox x:Name="txtSearch" Grid.Column="4" Width="200" Height="40" Background="#374151" 
                      Foreground="White" FontSize="14" BorderThickness="0" 
                      VerticalContentAlignment="Center" Padding="10,0,0,0"/>
 
-            <Button x:Name="btnSearch" Grid.Column="5" Content="Search" Width="80" Height="40" 
-                    Background="#6B7280" Foreground="White" BorderThickness="0" 
-                    Cursor="Hand" Margin="5,0,0,0" Click="btnSearch_Click">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="5"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
+            <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button x:Name="btnSearch" Content="Search" Width="80" Height="40" 
+            Background="#6B7280" Foreground="White" BorderThickness="0" 
+            Cursor="Hand" Margin="0,0,5,0" Click="btnSearch_Click">
+                    <Button.Resources>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </StackPanel>
         </Grid>
 
+        <!-- DataGrid -->
         <DataGrid x:Name="dgInventory" Grid.Row="2" Style="{StaticResource ModernDataGrid}" 
-                  AutoGenerateColumns="True" SelectionMode="Single">
-        </DataGrid>
+                  AutoGenerateColumns="True" SelectionMode="Single"/>
+        <Button x:Name="btnViewAll" Content="View All"
+            Background="#3B82F6" Foreground="White" BorderThickness="0"
+            Cursor="Hand" Click="btnViewAll_Click" RenderTransformOrigin="-5.999,0.562" Margin="480,78,548,20" Grid.RowSpan="2">
+            <Button.Resources>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="CornerRadius" Value="5"/>
+                </Style>
+            </Button.Resources>
+        </Button>
     </Grid>
 </Window>
