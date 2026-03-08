@@ -56,11 +56,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="InventoryManagement.xaml">
+    <Page Include="Inventory\InventoryManagement.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ItemDetailsWindow.xaml">
+    <Page Include="Inventory\ItemDetailsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Inventory\UpdateInventory.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -77,11 +81,17 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Database\DbConnection.cs" />
-    <Compile Include="InventoryManagement.xaml.cs">
+    <Compile Include="Data\ProductRepository.cs" />
+    <Compile Include="Inventory\CategoryFilter.cs" />
+    <Compile Include="Inventory\InventoryManagement.xaml.cs">
       <DependentUpon>InventoryManagement.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ItemDetailsWindow.xaml.cs">
+    <Compile Include="Inventory\ItemDetailsWindow.xaml.cs">
       <DependentUpon>ItemDetailsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Inventory\Search.cs" />
+    <Compile Include="Inventory\UpdateInventory.xaml.cs">
+      <DependentUpon>UpdateInventory.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainDashboard.xaml.cs">
       <DependentUpon>MainDashboard.xaml</DependentUpon>
