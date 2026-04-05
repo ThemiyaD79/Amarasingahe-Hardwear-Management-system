@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Data.SqlClient;
 using System.Windows;
-using HardwareManagementSystem.Database;
+using System.Data.SqlClient;
+using System.Configuration;
 
 namespace HardwareManagementSystem
 {
@@ -15,62 +15,63 @@ namespace HardwareManagementSystem
         private void btnLogin_Click(object sender, RoutedEventArgs e)
         {
             string username = txtUsername.Text.Trim();
-            string password = txtPassword.Password.Trim(); // WPF uses ..Password for security!
+            string password = txtPassword.Password;
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Please enter both a Username and a Password.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please enter both username and password.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            using (SqlConnection conn = DbConnection.GetConnection())
+            try
             {
-                if (conn == null) return;
-
-                try
+                string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
+                using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    conn.Open();
-                    string query = "SELECT Role, IsActive FROM Staff WHERE Username = @username AND PasswordHash = @password";
+                    con.Open();
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    // Fetching StaffID, Role, AND FullName
+                    string query = "SELECT StaffID, Role, FullName FROM Staff WHERE Username = @Username AND PasswordHash = @Password AND IsActive = 1";
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.Parameters.AddWithValue("@Username", username);
+                    cmd.Parameters.AddWithValue("@Password", password);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        cmd.Parameters.AddWithValue("@username", username);
-                        cmd.Parameters.AddWithValue("@password", password);
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        if (reader.Read())
                         {
-                            if (reader.Read())
+                            int staffId = Convert.ToInt32(reader["StaffID"]);
+                            string role = reader["Role"].ToString();
+                            string fullName = reader["FullName"].ToString();
+
+                            // Route them and pass their identity along!
+                            if (role == "Manager" || role == "Admin")
                             {
-                                bool isActive = Convert.ToBoolean(reader["IsActive"]);
-                                if (!isActive)
-                                {
-                                    MessageBox.Show("Your account is disabled. Please contact the Admin.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Error);
-                                    return;
-                                }
-
-                                string role = reader["Role"].ToString();
-
-                                // === NEW NAVIGATION LOGIC ===
-                                // 1. Create the Main Dashboard Window
-                                MainDashboard dashboard = new MainDashboard();
-
-                                // 2. Open the Dashboard
-                                dashboard.Show();
-
-                                // 3. Close the Login Window so it doesn't stay open in the background
+                                MainDashboard managerDash = new MainDashboard(staffId, fullName);
+                                managerDash.Show();
+                                this.Close();
+                            }
+                            else if (role == "Cashier")
+                            {
+                                CashierDashboard cashierDash = new CashierDashboard(staffId, fullName);
+                                cashierDash.Show();
                                 this.Close();
                             }
                             else
                             {
-                                MessageBox.Show("Invalid Username or Password. Please try again.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show($"Access Denied. The role '{role}' does not have a dashboard assigned.", "Authentication Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Invalid username or password, or your account has been disabled.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Database Error: " + ex.Message, "System Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Database Connection Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
