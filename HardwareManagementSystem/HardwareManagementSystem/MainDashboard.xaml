@@ -2,13 +2,15 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Main Dashboard - Amarasinghe Hardware" Height="800" Width="1200"
-        WindowStartupLocation="CenterScreen" Background="#111827">
+        WindowStartupLocation="CenterScreen" Background="#F1F5F9"
+        FontFamily="Segoe UI, Arial, sans-serif">
 
     <Window.Resources>
         <Style x:Key="SidebarButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#D1D5DB"/>
-            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Padding" Value="20,15"/>
@@ -16,122 +18,465 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="5">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Margin="10,2">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="15,0,0,0"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#374151"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Background" Value="#F8FAFC"/>
+                                <Setter Property="Foreground" Value="#0EA5E9"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="DashboardCard" TargetType="Border">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="25"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.05" Color="Black"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CardTitle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style x:Key="CardValue" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#0F172A"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="FontWeight" Value="ExtraBold"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="240"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="#1F2937" Padding="15">
-            <StackPanel>
-                <TextBlock Text="A. Hardware" Foreground="#F59E0B" FontSize="20" FontWeight="Bold" 
-                           HorizontalAlignment="Center" Margin="0,10,0,40"/>
-
-                <Button Content="Home" Style="{StaticResource SidebarButton}" x:Name="btnHomeNav"/>
-                <Button Content="Staff" Style="{StaticResource SidebarButton}" x:Name="btnStaffNav" Click="btnStaffNav_Click"/>
+        <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="0,0,1,0">
+            <StackPanel Margin="0,20,0,0">
+                <TextBlock Text="A. Hardware" Foreground="#0EA5E9" FontSize="22" FontWeight="ExtraBold" HorizontalAlignment="Center" Margin="0,10,0,30"/>
+                <TextBlock Text="MAIN MENU" Foreground="#94A3B8" FontSize="11" FontWeight="Bold" Margin="25,10,0,5"/>
+                <Button Content="Home (Overview)" Style="{StaticResource SidebarButton}" x:Name="btnHomeNav" Click="btnHomeNav_Click"/>
+                <Button Content="Sales History" Style="{StaticResource SidebarButton}" x:Name="btnSalesNav" Click="btnSalesNav_Click"/>
+                <TextBlock Text="BUSINESS" Foreground="#94A3B8" FontSize="11" FontWeight="Bold" Margin="25,15,0,5"/>
+                <Button Content="Debtors (Credit)" Style="{StaticResource SidebarButton}" x:Name="btnDebtorsNav" Click="btnDebtorsNav_Click"/>
                 <Button Content="Inventory" Style="{StaticResource SidebarButton}" x:Name="btnInventoryNav" Click="btnInventoryNav_Click"/>
-                <Button Content="Sales" Style="{StaticResource SidebarButton}" x:Name="btnSalesNav"/>
-
-                <Button Content="Cashier Dashboard" Style="{StaticResource SidebarButton}" x:Name="btnCashierNav" Click="btnCashierNav_Click"/>
-
+                <TextBlock Text="ADMINISTRATION" Foreground="#94A3B8" FontSize="11" FontWeight="Bold" Margin="25,15,0,5"/>
+                <Button Content="Staff Management" Style="{StaticResource SidebarButton}" x:Name="btnStaffNav" Click="btnStaffNav_Click"/>
                 <Button Content="Reports" Style="{StaticResource SidebarButton}" x:Name="btnReportsNav"/>
                 <Button Content="Settings" Style="{StaticResource SidebarButton}" x:Name="btnSettingsNav"/>
-
-                <Button Content="Logout" Background="#4B5563" Foreground="White" BorderThickness="0" 
-                        Margin="0,200,0,0" Padding="10" Click="btnLogout_Click"/>
+                <Border Height="1" Background="#E2E8F0" Margin="20,15"/>
+                <Button Content="Cashier Terminal" Style="{StaticResource SidebarButton}" x:Name="btnCashierNav" Click="btnCashierNav_Click" Foreground="#0EA5E9"/>
+                <Button Content="Logout" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Margin="20,15,20,0" Padding="12" FontWeight="Bold" Cursor="Hand" Click="btnLogout_Click"/>
             </StackPanel>
         </Border>
 
         <Grid Grid.Column="1" Margin="30">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <StackPanel Grid.Row="0" Margin="0,0,0,30">
-                <TextBlock Text="Welcome Back, Manager!" Foreground="White" FontSize="32" FontWeight="Bold"/>
-                <TextBlock Text="OverView" Foreground="#9CA3AF" FontSize="18" Margin="0,5,0,0"/>
-            </StackPanel>
-
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <Grid x:Name="TabOverview" Visibility="Visible">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-
-                <Grid.Resources>
-                    <Style x:Key="DashboardCard" TargetType="Border">
-                        <Setter Property="Background" Value="#1F2937"/>
-                        <Setter Property="CornerRadius" Value="10"/>
-                        <Setter Property="Padding" Value="20"/>
-                    </Style>
-                    <Style x:Key="CardTitle" TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="#9CA3AF"/>
-                        <Setter Property="FontSize" Value="14"/>
-                        <Setter Property="Margin" Value="0,0,0,5"/>
-                    </Style>
-                    <Style x:Key="CardValue" TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="White"/>
-                        <Setter Property="FontSize" Value="24"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
-                    </Style>
-                </Grid.Resources>
-
-                <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource DashboardCard}">
-                    <StackPanel>
-                        <TextBlock Text="Total Staff" Style="{StaticResource CardTitle}"/>
-                        <TextBlock Text="12" Style="{StaticResource CardValue}"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="2" Grid.Row="0" Style="{StaticResource DashboardCard}">
-                    <StackPanel>
-                        <TextBlock Text="Total Items" Style="{StaticResource CardTitle}"/>
-                        <TextBlock Text="1,250" Style="{StaticResource CardValue}"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="4" Grid.Row="0" Style="{StaticResource DashboardCard}" Background="#451a1a">
-                    <StackPanel>
-                        <TextBlock Text="Low Stock Items" Style="{StaticResource CardTitle}"/>
-                        <TextBlock Text="5" Style="{StaticResource CardValue}" Foreground="#EF4444"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="0" Grid.Row="1" Margin="0,20,0,0" Style="{StaticResource DashboardCard}" Grid.ColumnSpan="3">
-                    <StackPanel>
-                        <TextBlock Text="Today's Revenue (Rs)" Style="{StaticResource CardTitle}"/>
-                        <TextBlock Text="155,750.00" Style="{StaticResource CardValue}"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="4" Grid.Row="1" Margin="0,20,0,0" Style="{StaticResource DashboardCard}" >
-                    <TextBlock Text="Sales Graph Placeholder" Foreground="#4B5563" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
+                <StackPanel Grid.Row="0" Margin="0,0,0,30">
+                    <TextBlock x:Name="TxtWelcomeMessage" Text="Welcome Back, Manager!" Foreground="#0F172A" FontSize="32" FontWeight="Bold"/>
+                    <TextBlock Text="Store Performance Overview" Foreground="#64748B" FontSize="16" Margin="0,5,0,0"/>
+                </StackPanel>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Style="{StaticResource DashboardCard}">
+                        <StackPanel>
+                            <TextBlock Text="Total Active Staff" Style="{StaticResource CardTitle}"/>
+                            <TextBlock x:Name="TxtTotalStaff" Text="0" Style="{StaticResource CardValue}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource DashboardCard}">
+                        <StackPanel>
+                            <TextBlock Text="Total Physical Items in Stock" Style="{StaticResource CardTitle}"/>
+                            <TextBlock x:Name="TxtTotalItems" Text="0" Style="{StaticResource CardValue}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="4" Style="{StaticResource DashboardCard}" Background="#FEF2F2" BorderBrush="#FECACA">
+                        <StackPanel>
+                            <TextBlock Text="Low Stock Alerts" Style="{StaticResource CardTitle}" Foreground="#DC2626"/>
+                            <TextBlock x:Name="TxtLowStock" Text="0 Items" Style="{StaticResource CardValue}" Foreground="#991B1B"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Grid Grid.Row="2" Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Style="{StaticResource DashboardCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0">
+                                <TextBlock Text="Today's Total Revenue" Style="{StaticResource CardTitle}"/>
+                                <TextBlock x:Name="TxtTodayRevenue" Text="LKR 0.00" Style="{StaticResource CardValue}" Foreground="#10B981"/>
+                            </StackPanel>
+                            <Border Grid.Row="1" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,20,0,0" Padding="20">
+                                <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Height="150">
+                                    <Border Width="40" Height="80" Background="#BAE6FD" CornerRadius="4,4,0,0" VerticalAlignment="Bottom" Margin="8,0"/>
+                                    <Border Width="40" Height="120" Background="#3B82F6" CornerRadius="4,4,0,0" VerticalAlignment="Bottom" Margin="8,0"/>
+                                    <Border Width="40" Height="60" Background="#BAE6FD" CornerRadius="4,4,0,0" VerticalAlignment="Bottom" Margin="8,0"/>
+                                    <Border Width="40" Height="140" Background="#3B82F6" CornerRadius="4,4,0,0" VerticalAlignment="Bottom" Margin="8,0"/>
+                                    <Border Width="40" Height="90" Background="#BAE6FD" CornerRadius="4,4,0,0" VerticalAlignment="Bottom" Margin="8,0"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource DashboardCard}">
+                        <StackPanel>
+                            <TextBlock Text="Sales Breakdown (Today)" Style="{StaticResource CardTitle}"/>
+                            <Grid Height="180" Width="180" Margin="0,20">
+                                <Ellipse Stroke="#F1F5F9" StrokeThickness="30"/>
+                                <Ellipse Stroke="#10B981" StrokeThickness="30" StrokeDashArray="3 1" Margin="0"/>
+                                <Ellipse Stroke="#3B82F6" StrokeThickness="30" StrokeDashArray="1 3" Margin="0"/>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock x:Name="TxtTotalTransactions" Text="0" Foreground="#0F172A" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Transactions" Foreground="#64748B" FontSize="12" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Grid>
+
+            <Grid x:Name="TabDebtors" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Debtor Management" FontWeight="ExtraBold" FontSize="32" Foreground="#0F172A"/>
+                    </StackPanel>
+                </Grid>
+                <DataGrid x:Name="DgdDebtors" Grid.Row="1" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#E2E8F0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC" IsReadOnly="True" RowHeight="45" Foreground="#334155">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F1F5F9"/>
+                            <Setter Property="Foreground" Value="#475569"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Padding" Value="15,12"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding DebtorID}" Width="80"/>
+                        <DataGridTextColumn Header="Customer Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="150"/>
+                        <DataGridTextColumn Header="Outstanding Balance" Binding="{Binding TotalOutstandingAmount, StringFormat='LKR {0:N2}'}" Width="200">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="#EF4444"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="Action" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Pay Now" Background="#10B981" Foreground="White" Padding="10,5" Margin="5" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnOpenSettleDebt_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+            <Grid x:Name="TabSales" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel HorizontalAlignment="Left">
+                        <TextBlock Text="Sales History" FontWeight="ExtraBold" FontSize="32" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock Text="Filter by Cashier:" VerticalAlignment="Center" Foreground="#64748B" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <ComboBox x:Name="CmbStaffFilter" Width="150" Margin="0,0,20,0" Padding="5" SelectionChanged="CmbStaffFilter_SelectionChanged"/>
+                    </StackPanel>
+                </Grid>
+                <DataGrid x:Name="DgdSales" Grid.Row="1" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#E2E8F0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC" IsReadOnly="True" RowHeight="45" Foreground="#334155">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F1F5F9"/>
+                            <Setter Property="Foreground" Value="#475569"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Padding" Value="15,12"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Bill ID" Binding="{Binding BillID}" Width="80"/>
+                        <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=yyyy-MM-dd}" Width="120"/>
+                        <DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="100"/>
+                        <DataGridTextColumn Header="Cashier" Binding="{Binding StaffName}" Width="150"/>
+                        <DataGridTextColumn Header="Payment" Binding="{Binding PaymentType}" Width="100"/>
+                        <DataGridTextColumn Header="Grand Total" Binding="{Binding GrandTotal, StringFormat='LKR {0:N2}'}" Width="*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="#0F172A"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="Action" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="View Bill" Background="#3B82F6" Foreground="White" Padding="10,5" Margin="5" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnViewBill_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+            <Grid x:Name="TabStaff" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel HorizontalAlignment="Left">
+                        <TextBlock Text="System Users" FontWeight="ExtraBold" FontSize="32" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <Button Content="+ Add New Staff" Background="#10B981" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnAddStaff_Click"/>
+                        <Button Content="Update Selected" Background="#F59E0B" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnEditStaff_Click"/>
+                        <Button Content="Delete Selected" Background="#EF4444" Foreground="White" Padding="15,10" Margin="0,0,20,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDeleteStaff_Click"/>
+                    </StackPanel>
+                </Grid>
+                <DataGrid x:Name="DgdStaff" Grid.Row="1" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#E2E8F0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC" IsReadOnly="True" RowHeight="45" Foreground="#334155">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F1F5F9"/>
+                            <Setter Property="Foreground" Value="#475569"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Padding" Value="15,12"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding StaffID}" Width="60"/>
+                        <DataGridTextColumn Header="FULL NAME" Binding="{Binding FullName}" Width="*"/>
+                        <DataGridTextColumn Header="USERNAME" Binding="{Binding Username}" Width="120"/>
+                        <DataGridTextColumn Header="ROLE" Binding="{Binding Role}" Width="100"/>
+                        <DataGridTextColumn Header="PHONE" Binding="{Binding Phone}" Width="120"/>
+                        <DataGridCheckBoxColumn Header="ACTIVE" Binding="{Binding IsActive}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <Grid x:Name="TabInventory" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel HorizontalAlignment="Left">
+                        <TextBlock Text="Inventory Items" FontWeight="ExtraBold" FontSize="32" Foreground="#0F172A"/>
+                        <TextBlock Text="Manage products, pricing, and stock" Foreground="#64748B" FontSize="16" Margin="0,5,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <Button Content="+ Add New Item" Background="#10B981" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnAddInventory_Click"/>
+                        <Button Content="Update Selected" Background="#F59E0B" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnEditInventory_Click"/>
+                        <Button Content="Delete Selected" Background="#EF4444" Foreground="White" Padding="15,10" Margin="0,0,20,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDeleteInventory_Click"/>
+                    </StackPanel>
+                </Grid>
+                <DataGrid x:Name="DgdInventory" Grid.Row="1" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#E2E8F0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC" IsReadOnly="True" RowHeight="45" Foreground="#334155">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F1F5F9"/>
+                            <Setter Property="Foreground" Value="#475569"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Padding" Value="15,12"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding ProductID}" Width="60"/>
+                        <DataGridTemplateColumn Header="Pic" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding ImagePath}" Height="30" Stretch="Uniform"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="150"/>
+                        <DataGridTextColumn Header="Price" Binding="{Binding CurrentSellingPrice, StringFormat='LKR {0:N2}'}" Width="120"/>
+                        <DataGridTextColumn Header="Total Qty" Binding="{Binding TotalQuantity}" Width="80"/>
+                        <DataGridTextColumn Header="Reorder" Binding="{Binding ReorderLevel}" Width="80"/>
+                        <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="60"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Grid>
+
+        <Grid x:Name="InventoryModalOverlay" Grid.ColumnSpan="2" Background="#800F172A" Visibility="Collapsed" Panel.ZIndex="110">
+            <Border Background="White" Width="600" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30" CornerRadius="8">
+                <StackPanel>
+                    <TextBlock x:Name="TxtInvModalTitle" Text="ADD NEW PRODUCT &amp; BATCH" FontWeight="ExtraBold" FontSize="18" Foreground="#0F172A" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="HiddenInvProductID" Visibility="Collapsed"/>
+                    <TextBlock x:Name="HiddenImagePath" Visibility="Collapsed"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="180"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                            <TextBlock Text="Product Name:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBox x:Name="TxtInvName" Padding="5" Margin="0,0,0,10"/>
+
+                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock Text="BATCH DETAILS (Revenue Tracking)" FontWeight="ExtraBold" FontSize="10" Foreground="#0EA5E9" Margin="0,0,0,8"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                            <TextBlock Text="Batch Number:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                                            <TextBox x:Name="TxtBatchNumber" Padding="5" Margin="0,0,0,5"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                            <TextBlock Text="Purchase Qty:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                                            <TextBox x:Name="TxtBatchQty" Padding="5" Margin="0,0,0,5"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                            <TextBlock Text="Cost Price (Buy):" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                                            <TextBox x:Name="TxtCostPrice" Padding="5"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                            <TextBlock Text="Selling Price (Sell):" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                                            <TextBox x:Name="TxtInvPrice" Padding="5"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Category:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                                    <TextBox x:Name="TxtInvCategory" Padding="5"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Brand:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                                    <TextBox x:Name="TxtInvBrand" Padding="5"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <TextBlock Text="Product Image" FontWeight="Bold" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>
+                            <Border BorderBrush="#CBD5E0" BorderThickness="1" CornerRadius="8" Background="#F1F5F9" Width="130" Height="130" Margin="0,5" ClipToBounds="True">
+                                <Image x:Name="ImgProductPreview" Stretch="UniformToFill"/>
+                            </Border>
+                            <Button Content="Browse" Background="#E2E8F0" Foreground="#475569" Padding="10,5" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnBrowseImage_Click"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Reorder Level:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBox x:Name="TxtInvReorder" Padding="5" Width="100" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <CheckBox x:Name="ChkInvActive" Grid.Column="1" Content="Is Active?" VerticalAlignment="Bottom" FontWeight="Bold" IsChecked="True"/>
+                    </Grid>
+
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancel" Background="#E2E8F0" Foreground="#475569" Padding="10" Margin="0,0,5,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCloseInventoryModal_Click"/>
+                        <Button Grid.Column="1" Content="Save Product" Background="#3B82F6" Foreground="White" Padding="10" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnSaveInventory_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="StaffModalOverlay" Grid.ColumnSpan="2" Background="#800F172A" Visibility="Collapsed" Panel.ZIndex="110">
+            <Border Background="White" Width="450" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30" CornerRadius="8">
+                <StackPanel>
+                    <TextBlock x:Name="TxtStaffModalTitle" Text="ADD / EDIT STAFF" FontWeight="ExtraBold" FontSize="18" Foreground="#0F172A" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="HiddenStaffFormID" Visibility="Collapsed"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="Full Name:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBox x:Name="TxtStaffFullName" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Username:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBox x:Name="TxtStaffUsername" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Password:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <PasswordBox x:Name="TxtStaffPassword" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Role:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <ComboBox x:Name="CmbStaffRole" Padding="5" Margin="0,0,0,10">
+                                <ComboBoxItem Content="Cashier"/>
+                                <ComboBoxItem Content="Manager"/>
+                                <ComboBoxItem Content="Admin"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="NIC:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBox x:Name="TxtStaffNIC" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Phone:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBox x:Name="TxtStaffPhone" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Salary (LKR):" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBox x:Name="TxtStaffSalary" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Age:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBox x:Name="TxtStaffAge" Padding="5" Margin="0,0,0,10"/>
+                        </StackPanel>
+                    </Grid>
+                    <CheckBox x:Name="ChkStaffActive" Content="Is Account Active?" FontWeight="Bold" Margin="0,5,0,20" IsChecked="True"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancel" Background="#E2E8F0" Foreground="#475569" Padding="10" Margin="0,0,5,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCloseStaffModal_Click"/>
+                        <Button Grid.Column="1" Content="Save Staff" Background="#3B82F6" Foreground="White" Padding="10" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnSaveStaff_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </Window>
+
