@@ -98,12 +98,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AuthService.cs" />
     <Compile Include="CashierDashboard.xaml.cs">
       <DependentUpon>CashierDashboard.xaml</DependentUpon>
     </Compile>
     <Compile Include="Database\DbConnection.cs" />
     <Compile Include="Data\ProductRepository.cs" />
     <Compile Include="Data\StaffRepository.cs" />
+    <Compile Include="InventoryService.cs" />
     <Compile Include="Inventory\CategoryFilter.cs" />
     <Compile Include="Inventory\InventoryManagement.xaml.cs">
       <DependentUpon>InventoryManagement.xaml</DependentUpon>
@@ -122,8 +124,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Models.cs" />
     <Compile Include="Models\ProductModel.cs" />
     <Compile Include="Models\StaffModel.cs" />
+    <Compile Include="SalesService.cs" />
     <Compile Include="Staff\StaffDetailsWindow.xaml.cs">
       <DependentUpon>StaffDetailsWindow.xaml</DependentUpon>
     </Compile>

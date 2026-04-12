@@ -5,18 +5,29 @@ using System.Configuration;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace HardwareManagementSystem
 {
     public partial class CashierDashboard : Window
     {
-        public ObservableCollection<CartItem> ShoppingCart { get; set; }
-        private ObservableCollection<CashierProductItem> AllProducts { get; set; }
+        public ObservableCollection<CartItem> ShoppingCart { get; set; } = new ObservableCollection<CartItem>();
+        private ObservableCollection<Product> AllProducts { get; set; } = new ObservableCollection<Product>();
+
+        private List<string> activeCategories = new List<string>();
+        private List<string> activeSubCategories = new List<string>();
+
+        private decimal currentSubTotal = 0;
+        private decimal currentLineDiscounts = 0;
+        private decimal currentBillDiscount = 0;
         private decimal currentGrandTotal = 0;
 
-        // Identity Tracking
         private int loggedInStaffID;
         private string loggedInStaffName;
+
+        private Product pendingProductToAdd;
+        private CartItem itemBeingEdited;
 
         public CashierDashboard(int staffId = 4, string staffName = "Cashier")
         {
@@ -24,12 +35,9 @@ namespace HardwareManagementSystem
             loggedInStaffID = staffId;
             loggedInStaffName = staffName;
 
-            // Set the Cashier's real name in the UI
             if (TxtCurrentUserName != null)
                 TxtCurrentUserName.Text = loggedInStaffName;
 
-            ShoppingCart = new ObservableCollection<CartItem>();
-            AllProducts = new ObservableCollection<CashierProductItem>();
             DgdCart.ItemsSource = ShoppingCart;
             LoadProductsFromDatabase();
         }
@@ -38,35 +46,38 @@ namespace HardwareManagementSystem
         {
             try
             {
+                AllProducts.Clear();
                 string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     con.Open();
-                    // Groups by product to calculate live stock from the Batch table, and fetches the ImagePath
                     string query = @"
-                        SELECT p.ProductID, p.Name, p.CurrentSellingPrice, p.Category, p.ImagePath, 
-                               ISNULL(SUM(b.CurrentQuantity), 0) AS StockLeft 
+                        SELECT p.ProductID, p.Name, p.CurrentSellingPrice, p.Category, p.SubCategory, p.SellingUnit, p.ImagePath, 
+                               ISNULL(SUM(b.CurrentQuantity), 0) AS TotalQuantity 
                         FROM Product p 
                         LEFT JOIN Batch b ON p.ProductID = b.ProductID 
                         WHERE p.IsActive = 1 
-                        GROUP BY p.ProductID, p.Name, p.CurrentSellingPrice, p.Category, p.ImagePath";
+                        GROUP BY p.ProductID, p.Name, p.CurrentSellingPrice, p.Category, p.SubCategory, p.SellingUnit, p.ImagePath";
 
                     SqlCommand cmd = new SqlCommand(query, con);
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        AllProducts.Add(new CashierProductItem
+                        AllProducts.Add(new Product
                         {
                             ProductID = Convert.ToInt32(reader["ProductID"]),
-                            ProductName = reader["Name"].ToString(),
-                            SellingPrice = Convert.ToDecimal(reader["CurrentSellingPrice"]),
+                            Name = reader["Name"].ToString(),
+                            CurrentSellingPrice = Convert.ToDecimal(reader["CurrentSellingPrice"]),
                             Category = reader["Category"].ToString(),
-                            StockLeft = Convert.ToInt32(reader["StockLeft"]),
+                            SubCategory = reader["SubCategory"] != DBNull.Value ? reader["SubCategory"].ToString() : "",
+                            SellingUnit = reader["SellingUnit"].ToString(),
+                            TotalQuantity = Convert.ToDecimal(reader["TotalQuantity"]),
                             ImagePath = reader["ImagePath"] != DBNull.Value ? reader["ImagePath"].ToString() : null
                         });
                     }
                     IcProducts.ItemsSource = AllProducts;
+                    PopulateFilterCheckboxes();
                 }
             }
             catch (Exception ex)
@@ -75,68 +86,218 @@ namespace HardwareManagementSystem
             }
         }
 
-        // ==========================================
-        // CART LOGIC
-        // ==========================================
-        private void Category_Click(object sender, RoutedEventArgs e)
+        private void PopulateFilterCheckboxes()
         {
-            Button clickedButton = sender as Button;
-            string selectedCategory = clickedButton.Content.ToString();
-            if (selectedCategory == "All Categories")
-                IcProducts.ItemsSource = AllProducts;
-            else
-                IcProducts.ItemsSource = new ObservableCollection<CashierProductItem>(AllProducts.Where(p => p.Category == selectedCategory).ToList());
+            if (SpCategories == null || SpSubCategories == null) return;
+
+            SpCategories.Children.Clear();
+            SpSubCategories.Children.Clear();
+
+            var categories = AllProducts.Where(p => !string.IsNullOrWhiteSpace(p.Category)).Select(p => p.Category).Distinct().ToList();
+            var subCategories = AllProducts.Where(p => !string.IsNullOrWhiteSpace(p.SubCategory)).Select(p => p.SubCategory).Distinct().ToList();
+
+            foreach (var cat in categories)
+            {
+                CheckBox cb = new CheckBox { Content = cat, Foreground = new SolidColorBrush(Color.FromRgb(51, 65, 85)), Margin = new Thickness(10, 4, 0, 4), FontSize = 14, Cursor = System.Windows.Input.Cursors.Hand };
+                cb.Checked += (s, e) => { activeCategories.Add(cat); ApplyFilters(); };
+                cb.Unchecked += (s, e) => { activeCategories.Remove(cat); ApplyFilters(); };
+                SpCategories.Children.Add(cb);
+            }
+
+            foreach (var sub in subCategories)
+            {
+                CheckBox cb = new CheckBox { Content = sub, Foreground = new SolidColorBrush(Color.FromRgb(51, 65, 85)), Margin = new Thickness(10, 4, 0, 4), FontSize = 14, Cursor = System.Windows.Input.Cursors.Hand };
+                cb.Checked += (s, e) => { activeSubCategories.Add(sub); ApplyFilters(); };
+                cb.Unchecked += (s, e) => { activeSubCategories.Remove(sub); ApplyFilters(); };
+                SpSubCategories.Children.Add(cb);
+            }
+        }
+
+        private void ApplyFilters()
+        {
+            if (AllProducts == null || IcProducts == null) return;
+
+            string searchText = TxtProductSearch.Text.ToLower();
+            if (searchText == "search products...") searchText = "";
+
+            var filtered = AllProducts.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+                filtered = filtered.Where(p => p.Name.ToLower().Contains(searchText) || p.Brand?.ToLower().Contains(searchText) == true);
+
+            if (activeCategories.Count > 0)
+                filtered = filtered.Where(p => activeCategories.Contains(p.Category));
+
+            if (activeSubCategories.Count > 0)
+                filtered = filtered.Where(p => activeSubCategories.Contains(p.SubCategory));
+
+            IcProducts.ItemsSource = new ObservableCollection<Product>(filtered);
+        }
+
+        private void TxtProductSearch_TextChanged(object sender, TextChangedEventArgs e) { ApplyFilters(); }
+        private void TxtProductSearch_GotFocus(object sender, RoutedEventArgs e) { if (TxtProductSearch.Text == "Search products...") TxtProductSearch.Text = ""; }
+        private void TxtProductSearch_LostFocus(object sender, RoutedEventArgs e) { if (string.IsNullOrWhiteSpace(TxtProductSearch.Text)) TxtProductSearch.Text = "Search products..."; }
+        private void Category_Click(object sender, RoutedEventArgs e) { } // Legacy button support
+
+        private void BtnResetFilters_Click(object sender, RoutedEventArgs e)
+        {
+            activeCategories.Clear();
+            activeSubCategories.Clear();
+            TxtProductSearch.Text = "Search products...";
+            foreach (var child in SpCategories.Children) { if (child is CheckBox cb) cb.IsChecked = false; }
+            foreach (var child in SpSubCategories.Children) { if (child is CheckBox cb) cb.IsChecked = false; }
+            ApplyFilters();
         }
 
         private void BtnAddProduct_Click(object sender, RoutedEventArgs e)
         {
             Button clickedButton = sender as Button;
-            CashierProductItem selectedProduct = clickedButton.DataContext as CashierProductItem;
+            pendingProductToAdd = clickedButton.DataContext as Product;
 
-            if (selectedProduct != null)
+            if (pendingProductToAdd != null)
             {
-                // Basic check to see if they have stock before adding to cart
-                if (selectedProduct.StockLeft <= 0)
+                if (pendingProductToAdd.TotalQuantity <= 0)
                 {
                     MessageBox.Show("This item is currently out of stock!", "Out of Stock", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                var existingItem = ShoppingCart.FirstOrDefault(c => c.ProductID == selectedProduct.ProductID);
-                if (existingItem != null)
+                TxtAddProductName.Text = pendingProductToAdd.Name;
+                TxtAddProductStock.Text = $"Stock Available: {pendingProductToAdd.TotalQuantity:0.##} {pendingProductToAdd.SellingUnit}s";
+                TxtAddUnit.Text = pendingProductToAdd.SellingUnit;
+                TxtAddQuantity.Text = "1";
+                TxtAddQuantity.Focus();
+                TxtAddQuantity.SelectAll();
+
+                AddToCartOverlay.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void BtnCancelAdd_Click(object sender, RoutedEventArgs e)
+        {
+            AddToCartOverlay.Visibility = Visibility.Collapsed;
+            pendingProductToAdd = null;
+        }
+
+        private void BtnConfirmAdd_Click(object sender, RoutedEventArgs e)
+        {
+            if (pendingProductToAdd == null) return;
+
+            if (!decimal.TryParse(TxtAddQuantity.Text, out decimal desiredQty) || desiredQty <= 0)
+            {
+                MessageBox.Show("Please enter a valid number.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var existingItem = ShoppingCart.FirstOrDefault(c => c.ProductID == pendingProductToAdd.ProductID);
+            decimal currentQtyInCart = existingItem != null ? existingItem.Quantity : 0;
+
+            if (currentQtyInCart + desiredQty > pendingProductToAdd.TotalQuantity)
+            {
+                MessageBox.Show($"Cannot add {desiredQty}. You only have {pendingProductToAdd.TotalQuantity:0.##} in stock.", "Stock Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (existingItem != null)
+            {
+                existingItem.Quantity += desiredQty;
+                existingItem.TotalPrice = existingItem.Quantity * existingItem.UnitPrice;
+            }
+            else
+            {
+                ShoppingCart.Add(new CartItem
                 {
-                    // Check stock limit for multiples
-                    if (existingItem.Quantity + 1 > selectedProduct.StockLeft)
-                    {
-                        MessageBox.Show("Cannot add more. You have reached the available stock limit for this item.", "Stock Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                    existingItem.Quantity++;
-                    existingItem.TotalPrice = existingItem.Quantity * existingItem.UnitPrice;
-                }
-                else
+                    ProductID = pendingProductToAdd.ProductID,
+                    ProductName = pendingProductToAdd.Name,
+                    OriginalUnitPrice = pendingProductToAdd.CurrentSellingPrice,
+                    UnitPrice = pendingProductToAdd.CurrentSellingPrice,
+                    Quantity = desiredQty,
+                    SellingUnit = pendingProductToAdd.SellingUnit,
+                    TotalPrice = desiredQty * pendingProductToAdd.CurrentSellingPrice
+                });
+            }
+
+            DgdCart.Items.Refresh();
+            CalculateTotals();
+            AddToCartOverlay.Visibility = Visibility.Collapsed;
+            pendingProductToAdd = null;
+        }
+
+        private void BtnRemoveCartItem_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = sender as Button;
+            CartItem item = btn.DataContext as CartItem;
+            if (item != null) { ShoppingCart.Remove(item); CalculateTotals(); }
+        }
+
+        private void BtnEditCartItem_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = sender as Button;
+            itemBeingEdited = btn.DataContext as CartItem;
+            if (itemBeingEdited != null)
+            {
+                TxtEditProductName.Text = itemBeingEdited.ProductName;
+                TxtEditPrice.Text = itemBeingEdited.UnitPrice.ToString("0.00");
+                TxtEditQuantity.Text = itemBeingEdited.Quantity.ToString("0.##");
+                EditCartItemOverlay.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void BtnCancelEdit_Click(object sender, RoutedEventArgs e)
+        {
+            EditCartItemOverlay.Visibility = Visibility.Collapsed;
+            itemBeingEdited = null;
+        }
+
+        private void BtnConfirmEdit_Click(object sender, RoutedEventArgs e)
+        {
+            if (itemBeingEdited == null) return;
+
+            if (decimal.TryParse(TxtEditPrice.Text, out decimal newPrice) && decimal.TryParse(TxtEditQuantity.Text, out decimal newQty) && newQty > 0)
+            {
+                Product dbProduct = AllProducts.FirstOrDefault(p => p.ProductID == itemBeingEdited.ProductID);
+                if (dbProduct != null && newQty > dbProduct.TotalQuantity)
                 {
-                    ShoppingCart.Add(new CartItem { ProductID = selectedProduct.ProductID, ProductName = selectedProduct.ProductName, UnitPrice = selectedProduct.SellingPrice, Quantity = 1, TotalPrice = selectedProduct.SellingPrice });
+                    MessageBox.Show($"Cannot set quantity to {newQty}. Only {dbProduct.TotalQuantity:0.##} in stock.", "Stock Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 }
+
+                itemBeingEdited.UnitPrice = newPrice;
+                itemBeingEdited.Quantity = newQty;
+                itemBeingEdited.TotalPrice = newPrice * newQty;
+
                 DgdCart.Items.Refresh();
                 CalculateTotals();
+                EditCartItemOverlay.Visibility = Visibility.Collapsed;
+                itemBeingEdited = null;
             }
+            else { MessageBox.Show("Invalid numbers entered.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         private void CalculateTotals()
         {
-            decimal subTotal = 0;
-            foreach (var item in ShoppingCart) { subTotal += item.TotalPrice; }
-            currentGrandTotal = subTotal;
-            TxtSubTotal.Text = subTotal.ToString("N2");
-            TxtTotal.Text = currentGrandTotal.ToString("N2");
+            currentSubTotal = ShoppingCart.Sum(i => i.OriginalUnitPrice * i.Quantity);
+            currentLineDiscounts = ShoppingCart.Sum(i => i.LineDiscount);
+
+            if (TxtBillDiscount != null && decimal.TryParse(TxtBillDiscount.Text, out decimal dist)) { currentBillDiscount = dist; }
+            else { currentBillDiscount = 0; }
+
+            currentGrandTotal = currentSubTotal - currentLineDiscounts - currentBillDiscount;
+            if (currentGrandTotal < 0) currentGrandTotal = 0;
+
+            if (TxtSubTotal != null) TxtSubTotal.Text = currentSubTotal.ToString("N2");
+            if (TxtItemDiscounts != null) TxtItemDiscounts.Text = "- " + currentLineDiscounts.ToString("N2");
+            if (TxtTotal != null) TxtTotal.Text = currentGrandTotal.ToString("N2");
+
             CalculateChange();
         }
 
+        private void TxtBillDiscount_TextChanged(object sender, TextChangedEventArgs e) { CalculateTotals(); }
         private void TxtCash_TextChanged(object sender, TextChangedEventArgs e) { CalculateChange(); }
 
         private void CalculateChange()
         {
+            if (TxtCash == null || TxtChange == null) return;
             if (decimal.TryParse(TxtCash.Text, out decimal cashGiven))
             {
                 decimal change = cashGiven - currentGrandTotal;
@@ -148,13 +309,11 @@ namespace HardwareManagementSystem
         private void BtnClearOrder_Click(object sender, RoutedEventArgs e)
         {
             ShoppingCart.Clear();
-            TxtCash.Clear();
+            if (TxtCash != null) TxtCash.Clear();
+            if (TxtBillDiscount != null) TxtBillDiscount.Text = "0";
             CalculateTotals();
         }
 
-        // ==========================================
-        // CHECKOUT & PAYMENT LOGIC
-        // ==========================================
         private void BtnPay_Click(object sender, RoutedEventArgs e)
         {
             if (ShoppingCart.Count == 0 || !decimal.TryParse(TxtCash.Text, out decimal cashGiven) || cashGiven < currentGrandTotal)
@@ -217,7 +376,7 @@ namespace HardwareManagementSystem
                         insertCmd.Parameters.AddWithValue("@Phone", phone);
                         insertCmd.Parameters.AddWithValue("@Address", address);
                         insertCmd.Parameters.AddWithValue("@Amount", currentGrandTotal);
-                        insertCmd.Parameters.AddWithValue("@StaffID", loggedInStaffID); // Using dynamic identity
+                        insertCmd.Parameters.AddWithValue("@StaffID", loggedInStaffID);
                         debtorId = Convert.ToInt32(insertCmd.ExecuteScalar());
                     }
 
@@ -261,25 +420,25 @@ namespace HardwareManagementSystem
                     SqlCommand billCmd = new SqlCommand(insertBillQuery, con, transaction);
                     billCmd.Parameters.AddWithValue("@Date", DateTime.Now.Date);
                     billCmd.Parameters.AddWithValue("@Time", DateTime.Now.TimeOfDay);
-                    billCmd.Parameters.AddWithValue("@SubTotal", currentGrandTotal);
-                    billCmd.Parameters.AddWithValue("@BillDiscount", 0);
+                    billCmd.Parameters.AddWithValue("@SubTotal", currentSubTotal);
+                    billCmd.Parameters.AddWithValue("@BillDiscount", currentBillDiscount);
                     billCmd.Parameters.AddWithValue("@GrandTotal", currentGrandTotal);
                     billCmd.Parameters.AddWithValue("@PaymentType", paymentType);
                     billCmd.Parameters.AddWithValue("@Status", "Completed");
-                    billCmd.Parameters.AddWithValue("@StaffID", loggedInStaffID); // Using dynamic identity
+                    billCmd.Parameters.AddWithValue("@StaffID", loggedInStaffID);
 
                     if (debtorId.HasValue) billCmd.Parameters.AddWithValue("@DebtorID", debtorId.Value);
                     else billCmd.Parameters.AddWithValue("@DebtorID", DBNull.Value);
 
                     int generatedBillID = Convert.ToInt32(billCmd.ExecuteScalar());
-
                     string insertBillItemQuery = "INSERT INTO Bill_Item (QuantitySold, LineDiscount, SellingPriceAtTimeOfSale, BillID, ProductID, BatchID) VALUES (@Qty, @LineDiscount, @SellingPrice, @BillID, @ProductID, @BatchID)";
 
                     foreach (var item in ShoppingCart)
                     {
-                        string getBatchQuery = "SELECT TOP 1 BatchID FROM Batch WHERE ProductID = @ProductID AND CurrentQuantity > 0 ORDER BY ManufacturingDate ASC";
+                        string getBatchQuery = "SELECT TOP 1 BatchID FROM Batch WHERE ProductID = @ProductID AND CurrentQuantity >= @RequiredQty ORDER BY ManufacturingDate ASC";
                         SqlCommand batchCmd = new SqlCommand(getBatchQuery, con, transaction);
                         batchCmd.Parameters.AddWithValue("@ProductID", item.ProductID);
+                        batchCmd.Parameters.AddWithValue("@RequiredQty", item.Quantity);
                         object batchResult = batchCmd.ExecuteScalar();
 
                         if (batchResult == null) throw new Exception($"No inventory available in Batch table for '{item.ProductName}'!");
@@ -287,7 +446,7 @@ namespace HardwareManagementSystem
 
                         SqlCommand itemCmd = new SqlCommand(insertBillItemQuery, con, transaction);
                         itemCmd.Parameters.AddWithValue("@Qty", item.Quantity);
-                        itemCmd.Parameters.AddWithValue("@LineDiscount", 0);
+                        itemCmd.Parameters.AddWithValue("@LineDiscount", item.LineDiscount);
                         itemCmd.Parameters.AddWithValue("@SellingPrice", item.UnitPrice);
                         itemCmd.Parameters.AddWithValue("@BillID", generatedBillID);
                         itemCmd.Parameters.AddWithValue("@ProductID", item.ProductID);
@@ -306,6 +465,9 @@ namespace HardwareManagementSystem
                     TxtReceiptBillID.Text = "#" + generatedBillID.ToString();
                     TxtReceiptDate.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
                     IcReceiptItems.ItemsSource = ShoppingCart;
+                    TxtReceiptSubTotal.Text = currentSubTotal.ToString("N2");
+                    TxtReceiptItemDiscounts.Text = "- " + currentLineDiscounts.ToString("N2");
+                    TxtReceiptDiscount.Text = "- " + currentBillDiscount.ToString("N2");
                     TxtReceiptTotal.Text = currentGrandTotal.ToString("N2");
 
                     if (paymentType == "Credit")
@@ -320,7 +482,6 @@ namespace HardwareManagementSystem
                         TxtReceiptChange.Text = TxtChange.Text;
                     }
 
-                    // Force a refresh of the products so the Stock Left number updates instantly!
                     AllProducts.Clear();
                     LoadProductsFromDatabase();
 
@@ -357,21 +518,6 @@ namespace HardwareManagementSystem
         }
 
         private void BtnLogout_Click(object sender, RoutedEventArgs e) { MainWindow loginWindow = new MainWindow(); loginWindow.Show(); this.Close(); }
+        private void BtnSwitchToManager_Click(object sender, RoutedEventArgs e) { new MainDashboard(loggedInStaffID, loggedInStaffName).Show(); this.Close(); }
     }
-
-    // ==========================================
-    // DATA MODELS
-    // ==========================================
-    public class CashierProductItem
-    {
-        public int ProductID { get; set; }
-        public string ProductName { get; set; }
-        public decimal SellingPrice { get; set; }
-        public string Category { get; set; }
-        public int StockLeft { get; set; }
-        public string ImagePath { get; set; }
-    }
-
-    // We KEEP CartItem here because it belongs to the Cashier namespace!
-    public class CartItem { public int ProductID { get; set; } public string ProductName { get; set; } public decimal UnitPrice { get; set; } public int Quantity { get; set; } public decimal TotalPrice { get; set; } }
 }

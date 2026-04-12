@@ -205,6 +205,7 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
+
             <Grid x:Name="TabSales" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -252,6 +253,7 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
+
             <Grid x:Name="TabStaff" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -313,8 +315,8 @@
                         </Style>
                     </DataGrid.ColumnHeaderStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding ProductID}" Width="60"/>
-                        <DataGridTemplateColumn Header="Pic" Width="60">
+                        <DataGridTextColumn Header="ID" Binding="{Binding ProductID}" Width="50"/>
+                        <DataGridTemplateColumn Header="Pic" Width="50">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Image Source="{Binding ImagePath}" Height="30" Stretch="Uniform"/>
@@ -322,11 +324,11 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="150"/>
-                        <DataGridTextColumn Header="Price" Binding="{Binding CurrentSellingPrice, StringFormat='LKR {0:N2}'}" Width="120"/>
-                        <DataGridTextColumn Header="Total Qty" Binding="{Binding TotalQuantity}" Width="80"/>
-                        <DataGridTextColumn Header="Reorder" Binding="{Binding ReorderLevel}" Width="80"/>
-                        <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="60"/>
+                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="100"/>
+                        <DataGridTextColumn Header="Sub-Cat" Binding="{Binding SubCategory}" Width="100"/> <DataGridTextColumn Header="Unit" Binding="{Binding SellingUnit}" Width="60"/> <DataGridTextColumn Header="Price" Binding="{Binding CurrentSellingPrice, StringFormat='LKR {0:N2}'}" Width="100"/>
+                        <DataGridTextColumn Header="Qty" Binding="{Binding TotalQuantity}" Width="60"/>
+                        <DataGridTextColumn Header="Reorder" Binding="{Binding ReorderLevel}" Width="60"/>
+                        <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="50"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -359,7 +361,6 @@
                 <StackPanel>
                     <TextBlock Text="AMARASINGHE HARDWARE" FontWeight="ExtraBold" FontSize="20" HorizontalAlignment="Center" Foreground="#0F172A"/>
                     <TextBlock Text="123 Main Street, Ja-Ela, Sri Lanka" FontSize="12" HorizontalAlignment="Center" Foreground="#64748B" Margin="0,2,0,15"/>
-
                     <Grid Margin="0,0,0,5">
                         <TextBlock Text="Receipt No:" Foreground="#475569" FontWeight="Bold" HorizontalAlignment="Left"/>
                         <TextBlock x:Name="TxtReceiptBillID" Text="#00" HorizontalAlignment="Right" Foreground="#0F172A"/>
@@ -368,9 +369,7 @@
                         <TextBlock Text="Date/Time:" Foreground="#475569" FontWeight="Bold" HorizontalAlignment="Left"/>
                         <TextBlock x:Name="TxtReceiptDate" Text="00/00/0000 00:00" HorizontalAlignment="Right" Foreground="#0F172A"/>
                     </Grid>
-
                     <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Stroke="#94A3B8" StrokeThickness="1" StrokeDashArray="4 2" Margin="0,0,0,10"/>
-
                     <Grid Margin="0,0,0,5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -381,7 +380,6 @@
                         <TextBlock Grid.Column="1" Text="Qty" FontWeight="Bold" TextAlignment="Center"/>
                         <TextBlock Grid.Column="2" Text="Total" FontWeight="Bold" TextAlignment="Right"/>
                     </Grid>
-
                     <ItemsControl x:Name="IcBillItems" Margin="0,0,0,10">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -398,9 +396,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-
                     <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Stroke="#94A3B8" StrokeThickness="1" StrokeDashArray="4 2" Margin="0,10"/>
-
                     <Grid Margin="0,3">
                         <TextBlock Text="Net Total:" Foreground="#475569"/>
                         <TextBlock x:Name="TxtReceiptTotal" Text="0.00" HorizontalAlignment="Right" FontWeight="Bold" FontSize="16"/>
@@ -409,7 +405,6 @@
                         <TextBlock Text="Payment Info:" Foreground="#475569"/>
                         <TextBlock x:Name="TxtReceiptCash" Text="CASH" HorizontalAlignment="Right"/>
                     </Grid>
-
                     <TextBlock Text="Thank you for your business!" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" Margin="0,30,0,20"/>
                     <Button Content="Close Receipt" Click="BtnCloseBill_Click" Padding="12" Background="#F1F5F9" FontWeight="Bold" BorderThickness="0" Cursor="Hand"/>
                 </StackPanel>
@@ -428,8 +423,31 @@
                             <ColumnDefinition Width="180"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                            <TextBlock Text="Product Name:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock Text="Product Name (Be Specific):" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
                             <TextBox x:Name="TxtInvName" Padding="5" Margin="0,0,0,10"/>
+                            
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Sub-Category:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                                    <TextBox x:Name="TxtInvSubCategory" Padding="5"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Selling Unit:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                                    <ComboBox x:Name="CmbSellingUnit" Padding="5">
+                                        <ComboBoxItem Content="Piece" IsSelected="True"/>
+                                        <ComboBoxItem Content="Meter"/>
+                                        <ComboBoxItem Content="Kg"/>
+                                        <ComboBoxItem Content="Liter"/>
+                                        <ComboBoxItem Content="Can"/>
+                                        <ComboBoxItem Content="Packet"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
                             <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="BATCH DETAILS (Revenue Tracking)" FontWeight="ExtraBold" FontSize="10" Foreground="#0EA5E9" Margin="0,0,0,8"/>
@@ -443,7 +461,7 @@
                                             <TextBox x:Name="TxtBatchNumber" Padding="5" Margin="0,0,0,5"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                            <TextBlock Text="Purchase Qty:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                                            <TextBlock Text="Purchase Qty (Decimal):" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
                                             <TextBox x:Name="TxtBatchQty" Padding="5" Margin="0,0,0,5"/>
                                         </StackPanel>
                                     </Grid>
