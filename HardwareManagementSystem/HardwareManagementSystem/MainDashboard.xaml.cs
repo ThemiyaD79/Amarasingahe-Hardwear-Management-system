@@ -20,7 +20,7 @@ namespace HardwareManagementSystem
         public MainDashboard()
         {
             InitializeComponent();
-            this.loggedInStaffID = 1; 
+            this.loggedInStaffID = 1;
             this.loggedInStaffName = "Designer Mode";
         }
 
@@ -29,10 +29,10 @@ namespace HardwareManagementSystem
             InitializeComponent();
             this.loggedInStaffID = staffId;
             this.loggedInStaffName = staffName;
-            
+
             if (TxtWelcomeMessage != null)
                 TxtWelcomeMessage.Text = "Welcome Back, " + loggedInStaffName + "!";
-                
+
             RefreshDashboard();
         }
 
@@ -53,14 +53,14 @@ namespace HardwareManagementSystem
         // ==========================================
         private void LoadInventory() { DgdInventory.ItemsSource = FetchData("SELECT * FROM Product WHERE IsActive = 1").DefaultView; }
 
-        private void BtnAddInventory_Click(object sender, RoutedEventArgs e) 
-        { 
-            TxtInvModalTitle.Text = "ADD NEW PRODUCT"; 
+        private void BtnAddInventory_Click(object sender, RoutedEventArgs e)
+        {
+            TxtInvModalTitle.Text = "ADD NEW PRODUCT";
             HiddenInvProductID.Text = "";
-            TxtInvName.Clear(); TxtInvCategory.Clear(); TxtInvSubCategory.Clear(); 
-            TxtInvBrand.Clear(); TxtInvPrice.Clear(); TxtBatchQty.Clear(); 
+            TxtInvName.Clear(); TxtInvCategory.Clear(); TxtInvSubCategory.Clear();
+            TxtInvBrand.Clear(); TxtInvPrice.Clear(); TxtBatchQty.Clear();
             TxtCostPrice.Clear(); TxtBatchNumber.Clear();
-            InventoryModalOverlay.Visibility = Visibility.Visible; 
+            InventoryModalOverlay.Visibility = Visibility.Visible;
         }
 
         private void BtnEditInventory_Click(object sender, RoutedEventArgs e)
@@ -85,7 +85,8 @@ namespace HardwareManagementSystem
         {
             try
             {
-                Product p = new Product {
+                Product p = new Product
+                {
                     ProductID = string.IsNullOrEmpty(HiddenInvProductID.Text) ? 0 : int.Parse(HiddenInvProductID.Text),
                     Name = TxtInvName.Text,
                     Category = TxtInvCategory.Text,
@@ -98,7 +99,8 @@ namespace HardwareManagementSystem
                     IsActive = ChkInvActive.IsChecked ?? true,
                     ImagePath = HiddenImagePath.Text
                 };
-                Batch b = new Batch {
+                Batch b = new Batch
+                {
                     BatchNumber = TxtBatchNumber.Text,
                     CostPrice = string.IsNullOrEmpty(TxtCostPrice.Text) ? 0 : decimal.Parse(TxtCostPrice.Text),
                     InitialQuantity = string.IsNullOrEmpty(TxtBatchQty.Text) ? 0 : decimal.Parse(TxtBatchQty.Text) // Now using Decimal!
@@ -132,9 +134,9 @@ namespace HardwareManagementSystem
         // DEBTOR / SETTLEMENT
         // ==========================================
         private void LoadDebtors() { DgdDebtors.ItemsSource = FetchData("SELECT * FROM Debtor").DefaultView; }
-        
-        private void BtnOpenSettleDebt_Click(object sender, RoutedEventArgs e) 
-        { 
+
+        private void BtnOpenSettleDebt_Click(object sender, RoutedEventArgs e)
+        {
             if (DgdDebtors.SelectedItem is DataRowView row)
             {
                 HiddenDebtorID.Text = row["DebtorID"].ToString();
@@ -146,12 +148,12 @@ namespace HardwareManagementSystem
             }
         }
 
-        private void BtnConfirmSettle_Click(object sender, RoutedEventArgs e) 
-        { 
-            try 
+        private void BtnConfirmSettle_Click(object sender, RoutedEventArgs e)
+        {
+            try
             {
                 decimal paying = decimal.Parse(TxtAmountPaying.Text);
-                using (SqlConnection con = new SqlConnection(connString)) 
+                using (SqlConnection con = new SqlConnection(connString))
                 {
                     con.Open();
                     new SqlCommand($"UPDATE Debtor SET TotalOutstandingAmount -= {paying} WHERE DebtorID = {HiddenDebtorID.Text}", con).ExecuteNonQuery();
@@ -159,20 +161,20 @@ namespace HardwareManagementSystem
                 SettleDebtOverlay.Visibility = Visibility.Collapsed;
                 LoadDebtors();
                 MessageBox.Show("Payment recorded successfully!");
-            } 
+            }
             catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
         }
 
         private void BtnCancelSettle_Click(object sender, RoutedEventArgs e) => SettleDebtOverlay.Visibility = Visibility.Collapsed;
-        
-        private void TxtAmountPaying_TextChanged(object sender, TextChangedEventArgs e) 
-        { 
-            try 
+
+        private void TxtAmountPaying_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
             {
                 decimal total = decimal.Parse(TxtSettleTotalAmount.Text.Replace("LKR ", ""));
                 decimal paying = string.IsNullOrEmpty(TxtAmountPaying.Text) ? 0 : decimal.Parse(TxtAmountPaying.Text);
                 TxtRemainingBalance.Text = $"Balance After: LKR {(total - paying):N2}";
-            } 
+            }
             catch { }
         }
 
@@ -180,10 +182,10 @@ namespace HardwareManagementSystem
         // SALES / BILLS
         // ==========================================
         private void LoadSales() { DgdSales.ItemsSource = FetchData("SELECT b.*, s.FullName as StaffName FROM Bill b JOIN Staff s ON b.StaffID = s.StaffID").DefaultView; }
-        
-        private void BtnViewBill_Click(object sender, RoutedEventArgs e) 
-        { 
-            if (DgdSales.SelectedItem is DataRowView row) 
+
+        private void BtnViewBill_Click(object sender, RoutedEventArgs e)
+        {
+            if (DgdSales.SelectedItem is DataRowView row)
             {
                 TxtReceiptBillID.Text = "#" + row["BillID"].ToString();
                 DateTime date = Convert.ToDateTime(row["Date"]);
@@ -193,11 +195,11 @@ namespace HardwareManagementSystem
 
                 string query = $"SELECT p.Name as ProductName, bi.QuantitySold as Quantity, (bi.SellingPriceAtTimeOfSale * bi.QuantitySold) as TotalPrice FROM Bill_Item bi JOIN Product p ON bi.ProductID = p.ProductID WHERE bi.BillID = {row["BillID"]}";
                 IcBillItems.ItemsSource = FetchData(query).DefaultView;
-                
+
                 BillViewerOverlay.Visibility = Visibility.Visible;
             }
         }
-        
+
         private void BtnCloseBill_Click(object sender, RoutedEventArgs e) => BillViewerOverlay.Visibility = Visibility.Collapsed;
         private void CmbStaffFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
 
@@ -205,16 +207,16 @@ namespace HardwareManagementSystem
         // STAFF MANAGEMENT
         // ==========================================
         private void LoadStaff() { DgdStaff.ItemsSource = FetchData("SELECT StaffID, FullName, Username, Role, Phone, IsActive FROM Staff").DefaultView; }
-        
-        private void BtnAddStaff_Click(object sender, RoutedEventArgs e) 
-        { 
+
+        private void BtnAddStaff_Click(object sender, RoutedEventArgs e)
+        {
             TxtStaffModalTitle.Text = "ADD NEW SYSTEM USER";
             HiddenStaffFormID.Text = "";
             TxtStaffFullName.Clear(); TxtStaffUsername.Clear(); TxtStaffPassword.Password = "";
-            StaffModalOverlay.Visibility = Visibility.Visible; 
+            StaffModalOverlay.Visibility = Visibility.Visible;
         }
-        
-        private void BtnEditStaff_Click(object sender, RoutedEventArgs e) 
+
+        private void BtnEditStaff_Click(object sender, RoutedEventArgs e)
         {
             if (DgdStaff.SelectedItem is DataRowView row)
             {
@@ -228,21 +230,21 @@ namespace HardwareManagementSystem
                 StaffModalOverlay.Visibility = Visibility.Visible;
             }
         }
-        
-        private void BtnSaveStaff_Click(object sender, RoutedEventArgs e) 
+
+        private void BtnSaveStaff_Click(object sender, RoutedEventArgs e)
         {
             // Placeholder logic to close modal. Real SQL logic was provided in previous turn.
-            StaffModalOverlay.Visibility = Visibility.Collapsed; 
+            StaffModalOverlay.Visibility = Visibility.Collapsed;
         }
-        
+
         private void BtnDeleteStaff_Click(object sender, RoutedEventArgs e) { }
         private void BtnCloseStaffModal_Click(object sender, RoutedEventArgs e) => StaffModalOverlay.Visibility = Visibility.Collapsed;
 
         // ==========================================
         // HELPERS
         // ==========================================
-        private void RefreshDashboard() 
-        { 
+        private void RefreshDashboard()
+        {
             try
             {
                 using (SqlConnection con = new SqlConnection(connString))
@@ -258,14 +260,14 @@ namespace HardwareManagementSystem
             catch { }
         }
 
-        private DataTable FetchData(string query) 
-        { 
-            DataTable dt = new DataTable(); 
-            using (SqlConnection con = new SqlConnection(connString)) 
-            { 
-                new SqlDataAdapter(query, con).Fill(dt); 
-            } 
-            return dt; 
+        private DataTable FetchData(string query)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection con = new SqlConnection(connString))
+            {
+                new SqlDataAdapter(query, con).Fill(dt);
+            }
+            return dt;
         }
     }
 }
