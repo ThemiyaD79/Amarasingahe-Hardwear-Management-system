@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
 
@@ -61,6 +62,61 @@ namespace HardwareManagementSystem
                 }
                 catch { trans.Rollback(); throw; }
             }
+        }
+
+        // ==========================================
+        // NEW METHOD: GET STOCK BY SUPPLIER
+        // ==========================================
+        public DataTable GetStockBySupplier(int supplierId)
+        {
+            string query = @"
+                SELECT 
+                    p.Name AS ProductName, 
+                    SUM(b.CurrentQuantity) AS TotalStockLeft,
+                    p.SellingUnit
+                FROM Batch b
+                JOIN Product p ON b.ProductID = p.ProductID
+                WHERE b.SupplierID = @SupID AND b.CurrentQuantity > 0
+                GROUP BY p.Name, p.SellingUnit";
+
+            DataTable dt = new DataTable();
+            using (SqlConnection con = new SqlConnection(connString))
+            {
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@SupID", supplierId);
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+            }
+            return dt;
+        }
+
+        // ==========================================
+        // NEW METHOD: GET LOW STOCK ITEMS (OOP)
+        // ==========================================
+        public DataTable GetLowStockItems()
+        {
+            string query = @"
+                SELECT ProductID, Name, TotalQuantity 
+                FROM Product 
+                WHERE TotalQuantity <= ReorderLevel AND IsActive = 1 
+                ORDER BY TotalQuantity ASC";
+
+            DataTable dt = new DataTable();
+            using (SqlConnection con = new SqlConnection(connString))
+            {
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+            }
+            return dt;
         }
     }
 }
