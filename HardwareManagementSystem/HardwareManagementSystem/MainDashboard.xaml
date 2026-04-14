@@ -72,10 +72,11 @@
                 <TextBlock Text="BUSINESS" Foreground="#94A3B8" FontSize="11" FontWeight="Bold" Margin="25,15,0,5"/>
                 <Button Content="Debtors (Credit)" Style="{StaticResource SidebarButton}" x:Name="btnDebtorsNav" Click="btnDebtorsNav_Click"/>
                 <Button Content="Inventory" Style="{StaticResource SidebarButton}" x:Name="btnInventoryNav" Click="btnInventoryNav_Click"/>
+                <Button Content="Suppliers" Style="{StaticResource SidebarButton}" x:Name="btnSuppliersNav" Click="btnSuppliersNav_Click"/>
                 <TextBlock Text="ADMINISTRATION" Foreground="#94A3B8" FontSize="11" FontWeight="Bold" Margin="25,15,0,5"/>
                 <Button Content="Staff Management" Style="{StaticResource SidebarButton}" x:Name="btnStaffNav" Click="btnStaffNav_Click"/>
-                <Button Content="Reports" Style="{StaticResource SidebarButton}" x:Name="btnReportsNav"/>
-                <Button Content="Settings" Style="{StaticResource SidebarButton}" x:Name="btnSettingsNav"/>
+                <Button Content="Reports" Style="{StaticResource SidebarButton}" x:Name="btnReportsNav" Click="btnReportsNav_Click"/>
+                <Button Content="Settings" Style="{StaticResource SidebarButton}" x:Name="btnSettingsNav" Click="btnSettingsNav_Click"/>
                 <Border Height="1" Background="#E2E8F0" Margin="20,15"/>
                 <Button Content="Cashier Terminal" Style="{StaticResource SidebarButton}" x:Name="btnCashierNav" Click="btnCashierNav_Click" Foreground="#0EA5E9"/>
                 <Button Content="Logout" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Margin="20,15,20,0" Padding="12" FontWeight="Bold" Cursor="Hand" Click="btnLogout_Click"/>
@@ -89,10 +90,26 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Margin="0,0,0,30">
-                    <TextBlock x:Name="TxtWelcomeMessage" Text="Welcome Back, Manager!" Foreground="#0F172A" FontSize="32" FontWeight="Bold"/>
-                    <TextBlock Text="Store Performance Overview" Foreground="#64748B" FontSize="16" Margin="0,5,0,0"/>
-                </StackPanel>
+
+                <Grid Grid.Row="0" Margin="0,0,0,30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="TxtWelcomeMessage" Text="Welcome Back, Manager!" Foreground="#0F172A" FontSize="32" FontWeight="Bold"/>
+                        <TextBlock Text="Store Performance Overview" Foreground="#64748B" FontSize="16" Margin="0,5,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Cursor="Hand" VerticalAlignment="Top" Padding="10">
+                        <Grid>
+                            <TextBlock Text="🔔" FontSize="28"/>
+                            <Border Background="#EF4444" CornerRadius="10" MinWidth="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+                                <TextBlock x:Name="TxtNotificationCount" Text="0" Foreground="White" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,0"/>
+                            </Border>
+                        </Grid>
+                    </Button>
+                </Grid>
+
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -103,8 +120,8 @@
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Style="{StaticResource DashboardCard}">
                         <StackPanel>
-                            <TextBlock Text="Total Active Staff" Style="{StaticResource CardTitle}"/>
-                            <TextBlock x:Name="TxtTotalStaff" Text="0" Style="{StaticResource CardValue}"/>
+                            <TextBlock Text="Total Accounts Payable" Style="{StaticResource CardTitle}" Foreground="#DC2626"/>
+                            <TextBlock x:Name="TxtTotalPayable" Text="LKR 0.00" Style="{StaticResource CardValue}" Foreground="#DC2626"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="2" Style="{StaticResource DashboardCard}">
@@ -120,6 +137,7 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+
                 <Grid Grid.Row="2" Margin="0,20,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.5*"/>
@@ -135,6 +153,8 @@
                             <StackPanel Grid.Row="0">
                                 <TextBlock Text="Today's Total Revenue" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Name="TxtTodayRevenue" Text="LKR 0.00" Style="{StaticResource CardValue}" Foreground="#10B981"/>
+                                <ProgressBar x:Name="ProgDailyGoal" Height="8" Margin="0,15,0,5" Foreground="#10B981" Background="#E2E8F0" BorderThickness="0"/>
+                                <TextBlock x:Name="TxtGoalProgress" Text="0% of Daily Target" FontSize="11" Foreground="#64748B" HorizontalAlignment="Right"/>
                             </StackPanel>
                             <Border Grid.Row="1" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Margin="0,20,0,0" Padding="20">
                                 <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Height="150">
@@ -147,18 +167,42 @@
                             </Border>
                         </Grid>
                     </Border>
+
                     <Border Grid.Column="2" Style="{StaticResource DashboardCard}">
                         <StackPanel>
-                            <TextBlock Text="Sales Breakdown (Today)" Style="{StaticResource CardTitle}"/>
-                            <Grid Height="180" Width="180" Margin="0,20">
-                                <Ellipse Stroke="#F1F5F9" StrokeThickness="30"/>
-                                <Ellipse Stroke="#10B981" StrokeThickness="30" StrokeDashArray="3 1" Margin="0"/>
-                                <Ellipse Stroke="#3B82F6" StrokeThickness="30" StrokeDashArray="1 3" Margin="0"/>
-                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <TextBlock x:Name="TxtTotalTransactions" Text="0" Foreground="#0F172A" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Transactions" Foreground="#64748B" FontSize="12" HorizontalAlignment="Center"/>
-                                </StackPanel>
+                            <Grid>
+                                <TextBlock Text="Critical Low Stock Alerts" Style="{StaticResource CardTitle}" Foreground="#DC2626"/>
+                                <TextBlock x:Name="TxtTotalTransactions" Visibility="Collapsed"/>
                             </Grid>
+
+                            <DataGrid x:Name="DgdLowStock" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" IsReadOnly="True" RowHeight="35" Height="190" Margin="0,10,0,0">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="#FEF2F2"/>
+                                        <Setter Property="Foreground" Value="#DC2626"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Padding" Value="10,8"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*"/>
+                                    <DataGridTextColumn Header="Left" Binding="{Binding TotalQuantity}" Width="50">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#DC2626"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTemplateColumn Header="Action" Width="70">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Restock" Background="#3B82F6" Foreground="White" Padding="5,2" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnOpenRestock_Click"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -300,6 +344,7 @@
                         <TextBlock Text="Manage products, pricing, and stock" Foreground="#64748B" FontSize="16" Margin="0,5,0,0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <Button Content="📥 Restock (Add Batch)" Background="#3B82F6" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnOpenRestock_Click"/>
                         <Button Content="+ Add New Item" Background="#10B981" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnAddInventory_Click"/>
                         <Button Content="Update Selected" Background="#F59E0B" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnEditInventory_Click"/>
                         <Button Content="Delete Selected" Background="#EF4444" Foreground="White" Padding="15,10" Margin="0,0,20,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDeleteInventory_Click"/>
@@ -334,6 +379,158 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
+
+            <Grid x:Name="TabSuppliers" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel HorizontalAlignment="Left">
+                        <TextBlock Text="Supplier Management" FontWeight="ExtraBold" FontSize="32" Foreground="#0F172A"/>
+                        <TextBlock Text="Manage vendors and view supplied stock" Foreground="#64748B" FontSize="16" Margin="0,5,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <Button Content="+ Add New Supplier" Background="#10B981" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnQuickAddSupplier_Click"/>
+                    </StackPanel>
+                </Grid>
+                <DataGrid x:Name="DgdSuppliers" Grid.Row="1" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#E2E8F0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC" IsReadOnly="True" RowHeight="45" Foreground="#334155">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F1F5F9"/>
+                            <Setter Property="Foreground" Value="#475569"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Padding" Value="15,12"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding SupplierID}" Width="40"/>
+                        <DataGridTextColumn Header="Supplier Name" Binding="{Binding SupplierName}" Width="*"/>
+                        <DataGridTextColumn Header="Company" Binding="{Binding CompanyName}" Width="150"/>
+                        <DataGridTextColumn Header="Outstanding" Binding="{Binding OutstandingBalance, StringFormat='LKR {0:N2}'}" Width="120">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#DC2626"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="Action" Width="200">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="View Stock" Background="#3B82F6" Foreground="White" Padding="10,5" Margin="5,5,2,5" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnViewSupplierStock_Click"/>
+                                        <Button Content="Pay" Background="#10B981" Foreground="White" Padding="10,5" Margin="2,5,5,5" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnOpenSettleSupplier_Click"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <Grid x:Name="TabReports" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel HorizontalAlignment="Left">
+                        <TextBlock Text="Financial Reports" FontSize="32" FontWeight="ExtraBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock Text="From:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,5,0" Foreground="#64748B"/>
+                        <DatePicker x:Name="DpReportFrom" Width="120" Margin="0,0,15,0"/>
+                        <TextBlock Text="To:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,5,0" Foreground="#64748B"/>
+                        <DatePicker x:Name="DpReportTo" Width="120" Margin="0,0,15,0"/>
+                        <Button Content="Filter" Background="#3B82F6" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnFilterReports_Click" Margin="0,0,10,0"/>
+                        <Button Content="↓ Export CSV" Background="#10B981" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDownloadReport_Click" Margin="0,0,10,0"/>
+                        <Button Content="🖨 Print" Background="#F59E0B" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnPrintReport_Click"/>
+                    </StackPanel>
+                </Grid>
+                <Border Grid.Row="1" Style="{StaticResource DashboardCard}" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Net Profit (Selected Period)" Style="{StaticResource CardTitle}"/>
+                        <TextBlock x:Name="TxtMonthlyProfit" Text="LKR 0.00" Style="{StaticResource CardValue}" Foreground="#10B981"/>
+                    </StackPanel>
+                </Border>
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Style="{StaticResource DashboardCard}" Padding="15">
+                            <StackPanel>
+                                <TextBlock Text="Daily Performance" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
+                                <DataGrid x:Name="DgdFinancialSummary" AutoGenerateColumns="False" IsReadOnly="True" Height="200" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC">
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="Background" Value="#F1F5F9"/>
+                                            <Setter Property="Foreground" Value="#475569"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Padding" Value="15,12"/>
+                                        </Style>
+                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=yyyy-MM-dd}" Width="*"/>
+                                        <DataGridTextColumn Header="Bills" Binding="{Binding TotalBills}" Width="60"/>
+                                        <DataGridTextColumn Header="Revenue" Binding="{Binding TotalRevenue, StringFormat='N2'}" Width="100"/>
+                                        <DataGridTextColumn Header="Profit" Binding="{Binding TotalProfit, StringFormat='N2'}" Width="100"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Row="2" Style="{StaticResource DashboardCard}" Padding="15">
+                            <StackPanel>
+                                <TextBlock Text="Items Sold (Selected Period)" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
+                                <DataGrid x:Name="DgdItemsSoldReport" AutoGenerateColumns="False" IsReadOnly="True" Height="200" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC">
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="Background" Value="#F1F5F9"/>
+                                            <Setter Property="Foreground" Value="#475569"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Padding" Value="15,12"/>
+                                        </Style>
+                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Item" Binding="{Binding ProductName}" Width="*"/>
+                                        <DataGridTextColumn Header="Total Qty Sold" Binding="{Binding TotalQty}" Width="100"/>
+                                        <DataGridTextColumn Header="Revenue Generated" Binding="{Binding TotalRevenue, StringFormat='N2'}" Width="150"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Grid.Column="2" Style="{StaticResource DashboardCard}" Padding="15">
+                        <StackPanel>
+                            <TextBlock Text="Cashier Sales" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
+                            <DataGrid x:Name="DgdCashierReport" AutoGenerateColumns="False" IsReadOnly="True" Height="420" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="#F1F5F9"/>
+                                        <Setter Property="Foreground" Value="#475569"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Padding" Value="15,12"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Staff" Binding="{Binding CashierName}" Width="*"/>
+                                    <DataGridTextColumn Header="Total Sales" Binding="{Binding TotalSales, StringFormat='N2'}" Width="100"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+
         </Grid>
 
         <Grid x:Name="SettleDebtOverlay" Grid.ColumnSpan="2" Background="#800F172A" Visibility="Collapsed" Panel.ZIndex="200">
@@ -354,6 +551,28 @@
                         <Button Grid.Column="1" Content="Confirm Pay" Click="BtnConfirmSettle_Click" Background="#10B981" Foreground="White" Padding="10" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
                     </Grid>
                     <TextBlock x:Name="HiddenDebtorID" Visibility="Collapsed"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="SettleSupplierDebtOverlay" Grid.ColumnSpan="2" Background="#800F172A" Visibility="Collapsed" Panel.ZIndex="200">
+            <Border Background="White" Width="400" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30" CornerRadius="12">
+                <StackPanel>
+                    <TextBlock Text="PAY SUPPLIER DEBT" FontWeight="ExtraBold" FontSize="18" Foreground="#0EA5E9" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                    <TextBlock x:Name="TxtSettleSupplierName" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    <TextBlock x:Name="TxtSettleSupplierTotalAmount" FontWeight="Bold" FontSize="20" Foreground="#DC2626" Margin="0,0,0,20"/>
+                    <TextBlock Text="Enter Amount Paying to Supplier:" FontSize="12" Foreground="#64748B" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TxtSupplierAmountPaying" Padding="10" Margin="0,0,0,15" FontSize="14" TextChanged="TxtSupplierAmountPaying_TextChanged"/>
+                    <TextBlock x:Name="TxtSupplierRemainingBalance" Text="Balance After: LKR 0.00" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,0,0,20"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancel" Click="BtnCancelSettleSupplier_Click" Background="#E2E8F0" Foreground="#475569" Padding="10" Margin="0,0,5,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
+                        <Button Grid.Column="1" Content="Confirm Payment" Click="BtnConfirmSettleSupplier_Click" Background="#10B981" Foreground="White" Padding="10" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
+                    </Grid>
+                    <TextBlock x:Name="HiddenSupplierPayID" Visibility="Collapsed"/>
                 </StackPanel>
             </Border>
         </Grid>
@@ -576,5 +795,141 @@
                 </StackPanel>
             </Border>
         </Grid>
+
+        <Grid x:Name="RestockModalOverlay" Grid.ColumnSpan="2" Background="#800F172A" Visibility="Collapsed" Panel.ZIndex="120">
+            <Border Background="White" Width="450" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30" CornerRadius="8">
+                <StackPanel>
+                    <TextBlock Text="RESTOCK EXISTING ITEM" FontWeight="ExtraBold" FontSize="18" Foreground="#0F172A" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+
+                    <TextBlock Text="Select Product:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                    <ComboBox x:Name="CmbRestockProduct" DisplayMemberPath="Name" SelectedValuePath="ProductID" Padding="5" Margin="0,0,0,10" SelectionChanged="CmbRestockProduct_SelectionChanged"/>
+
+                    <TextBlock Text="Supplier:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Grid.Column="0" x:Name="CmbRestockSupplier" DisplayMemberPath="SupplierName" SelectedValuePath="SupplierID" Padding="5"/>
+                        <Button Grid.Column="1" Content="+ New" Width="50" Margin="5,0,0,0" Background="#10B981" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="BtnQuickAddSupplier_Click"/>
+                    </Grid>
+
+                    <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,15">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Batch Number:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                                    <TextBox x:Name="TxtRestockBatchNo" Padding="5" Margin="0,0,0,10"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Qty Received:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                                    <TextBox x:Name="TxtRestockQty" Padding="5" Margin="0,0,0,10"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="New Cost Price:" FontWeight="Bold" FontSize="11" Foreground="#DC2626"/>
+                                    <TextBox x:Name="TxtRestockCost" Padding="5"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Update Selling Price:" FontWeight="Bold" FontSize="11" Foreground="#10B981"/>
+                                    <TextBox x:Name="TxtRestockSellingPrice" Padding="5"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancel" Background="#E2E8F0" Foreground="#475569" Padding="10" Margin="0,0,5,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCloseRestock_Click"/>
+                        <Button Grid.Column="1" Content="Save Stock" Background="#3B82F6" Foreground="White" Padding="10" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnSaveRestock_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="SupplierStockModalOverlay" Grid.ColumnSpan="2" Background="#800F172A" Visibility="Collapsed" Panel.ZIndex="160">
+            <Border Background="White" Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30" CornerRadius="8">
+                <StackPanel>
+                    <TextBlock x:Name="TxtStockModalSupplierName" Text="Stock from: Supplier" FontWeight="ExtraBold" FontSize="18" Foreground="#0F172A" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                    <DataGrid x:Name="DgdSupplierStock" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#E2E8F0" IsReadOnly="True" RowHeight="35" Height="250" Margin="0,0,0,20">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#F1F5F9"/>
+                                <Setter Property="Foreground" Value="#475569"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="15,12"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Product Name" Binding="{Binding ProductName}" Width="*"/>
+                            <DataGridTextColumn Header="Stock Left" Binding="{Binding TotalStockLeft}" Width="100"/>
+                            <DataGridTextColumn Header="Unit" Binding="{Binding SellingUnit}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Button Content="Close" Background="#E2E8F0" Foreground="#475569" Padding="10" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCloseSupplierStock_Click" HorizontalAlignment="Center" Width="100"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="QuickSupplierModalOverlay" Grid.ColumnSpan="2" Background="#CC0F172A" Visibility="Collapsed" Panel.ZIndex="170">
+            <Border Background="White" Width="300" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20" CornerRadius="8">
+                <StackPanel>
+                    <TextBlock Text="ADD NEW SUPPLIER" FontWeight="ExtraBold" FontSize="14" Foreground="#0F172A" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Supplier Name:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                    <TextBox x:Name="TxtQuickSupplierName" Padding="5" Margin="0,0,0,10"/>
+                    <TextBlock Text="Phone Number:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                    <TextBox x:Name="TxtQuickSupplierPhone" Padding="5" Margin="0,0,0,20"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancel" Background="#E2E8F0" Foreground="#475569" Padding="8" Margin="0,0,5,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCancelQuickSupplier_Click"/>
+                        <Button Grid.Column="1" Content="Save" Background="#3B82F6" Foreground="White" Padding="8" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnSaveQuickSupplier_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="SettingsModalOverlay" Grid.ColumnSpan="2" Background="#800F172A" Visibility="Collapsed" Panel.ZIndex="300">
+            <Border Background="White" Width="350" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30" CornerRadius="8">
+                <StackPanel>
+                    <TextBlock Text="SYSTEM SETTINGS" FontWeight="ExtraBold" FontSize="18" Foreground="#0F172A" Margin="0,0,0,20" HorizontalAlignment="Center"/>
+
+                    <TextBlock Text="Daily Revenue Goal (LKR):" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                    <TextBox x:Name="TxtDailyGoal" Text="100000" Padding="8" Margin="0,5,0,20" FontSize="14"/>
+
+                    <TextBlock Text="Application Theme:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                    <ComboBox x:Name="CmbTheme" Padding="8" Margin="0,5,0,20">
+                        <ComboBoxItem Content="Light Mode" IsSelected="True"/>
+                        <ComboBoxItem Content="Dark Mode"/>
+                    </ComboBox>
+
+                    <Button Content="💾 Create Database Backup" Background="#10B981" Foreground="White" Padding="10" Margin="0,0,0,20" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnBackupDB_Click"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Close" Background="#E2E8F0" Foreground="#475569" Padding="10" Margin="0,0,5,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCloseSettings_Click"/>
+                        <Button Grid.Column="1" Content="Save Settings" Background="#3B82F6" Foreground="White" Padding="10" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnSaveSettings_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
     </Grid>
 </Window>

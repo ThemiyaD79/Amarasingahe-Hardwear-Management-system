@@ -150,6 +150,7 @@
     <Compile Include="Staff\UpdateStaffDetails.xaml.cs">
       <DependentUpon>UpdateStaffDetails.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Supplier.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
