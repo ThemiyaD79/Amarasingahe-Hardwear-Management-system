@@ -256,7 +256,8 @@ namespace HardwareManagementSystem
             if (decimal.TryParse(TxtEditPrice.Text, out decimal newPrice) && decimal.TryParse(TxtEditQuantity.Text, out decimal newQty) && newQty > 0)
             {
                 Product dbProduct = AllProducts.FirstOrDefault(p => p.ProductID == itemBeingEdited.ProductID);
-                if (dbProduct != null && newQty > dbProduct.TotalQuantity)
+
+                if (dbProduct != null && newQty > dbProduct.TotalQuantity && itemBeingEdited.ProductID > 0)
                 {
                     MessageBox.Show($"Cannot set quantity to {newQty}. Only {dbProduct.TotalQuantity:0.##} in stock.", "Stock Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -402,6 +403,9 @@ namespace HardwareManagementSystem
             ProcessTransaction("Credit", debtorId, 0);
         }
 
+        // ==========================================
+        // UPDATED: TRANSACTION LOGIC TO FIX CUSTOM ITEMS
+        // ==========================================
         private void ProcessTransaction(string paymentType, int? debtorId, decimal cashGiven)
         {
             string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
@@ -435,29 +439,55 @@ namespace HardwareManagementSystem
 
                     foreach (var item in ShoppingCart)
                     {
-                        string getBatchQuery = "SELECT TOP 1 BatchID FROM Batch WHERE ProductID = @ProductID AND CurrentQuantity >= @RequiredQty ORDER BY ManufacturingDate ASC";
-                        SqlCommand batchCmd = new SqlCommand(getBatchQuery, con, transaction);
-                        batchCmd.Parameters.AddWithValue("@ProductID", item.ProductID);
-                        batchCmd.Parameters.AddWithValue("@RequiredQty", item.Quantity);
-                        object batchResult = batchCmd.ExecuteScalar();
+                        int currentProductId = item.ProductID;
+                        int batchID = 0;
 
-                        if (batchResult == null) throw new Exception($"No inventory available in Batch table for '{item.ProductName}'!");
-                        int batchID = Convert.ToInt32(batchResult);
+                        // FIX: Check if it's a Manual/Custom Item (Has a negative ID)
+                        if (currentProductId < 0)
+                        {
+                            // Create a hidden "One-Time" product in the DB to satisfy relationships (IsActive = 0)
+                            string createDummyProd = "INSERT INTO Product (Name, Category, Brand, CurrentSellingPrice, TotalQuantity, ReorderLevel, IsActive, StaffID) VALUES (@n, 'Custom Item', 'Manual Entry', @p, 0, 0, 0, @sid); SELECT SCOPE_IDENTITY();";
+                            SqlCommand dummyProdCmd = new SqlCommand(createDummyProd, con, transaction);
+                            dummyProdCmd.Parameters.AddWithValue("@n", item.ProductName);
+                            dummyProdCmd.Parameters.AddWithValue("@p", item.UnitPrice);
+                            dummyProdCmd.Parameters.AddWithValue("@sid", loggedInStaffID);
+                            currentProductId = Convert.ToInt32(dummyProdCmd.ExecuteScalar());
 
+                            // Create a dummy batch for it to satisfy relationships
+                            string createDummyBatch = "INSERT INTO Batch (BatchNumber, CostPrice, InitialQuantity, CurrentQuantity, ManufacturingDate, ProductID, SupplierID) VALUES ('MANUAL', @p, 0, 0, GETDATE(), @pid, 1); SELECT SCOPE_IDENTITY();";
+                            SqlCommand dummyBatchCmd = new SqlCommand(createDummyBatch, con, transaction);
+                            dummyBatchCmd.Parameters.AddWithValue("@p", item.UnitPrice);
+                            dummyBatchCmd.Parameters.AddWithValue("@pid", currentProductId);
+                            batchID = Convert.ToInt32(dummyBatchCmd.ExecuteScalar());
+                        }
+                        else
+                        {
+                            // Normal Item Logic
+                            string getBatchQuery = "SELECT TOP 1 BatchID FROM Batch WHERE ProductID = @ProductID AND CurrentQuantity >= @RequiredQty ORDER BY ManufacturingDate ASC";
+                            SqlCommand batchCmd = new SqlCommand(getBatchQuery, con, transaction);
+                            batchCmd.Parameters.AddWithValue("@ProductID", currentProductId);
+                            batchCmd.Parameters.AddWithValue("@RequiredQty", item.Quantity);
+                            object batchResult = batchCmd.ExecuteScalar();
+
+                            if (batchResult == null) throw new Exception($"No inventory available in Batch table for '{item.ProductName}'!");
+                            batchID = Convert.ToInt32(batchResult);
+
+                            string updateBatchQuery = "UPDATE Batch SET CurrentQuantity = CurrentQuantity - @Qty WHERE BatchID = @BatchID";
+                            SqlCommand updateCmd = new SqlCommand(updateBatchQuery, con, transaction);
+                            updateCmd.Parameters.AddWithValue("@Qty", item.Quantity);
+                            updateCmd.Parameters.AddWithValue("@BatchID", batchID);
+                            updateCmd.ExecuteNonQuery();
+                        }
+
+                        // Save Bill Item securely
                         SqlCommand itemCmd = new SqlCommand(insertBillItemQuery, con, transaction);
                         itemCmd.Parameters.AddWithValue("@Qty", item.Quantity);
                         itemCmd.Parameters.AddWithValue("@LineDiscount", item.LineDiscount);
                         itemCmd.Parameters.AddWithValue("@SellingPrice", item.UnitPrice);
                         itemCmd.Parameters.AddWithValue("@BillID", generatedBillID);
-                        itemCmd.Parameters.AddWithValue("@ProductID", item.ProductID);
+                        itemCmd.Parameters.AddWithValue("@ProductID", currentProductId);
                         itemCmd.Parameters.AddWithValue("@BatchID", batchID);
                         itemCmd.ExecuteNonQuery();
-
-                        string updateBatchQuery = "UPDATE Batch SET CurrentQuantity = CurrentQuantity - @Qty WHERE BatchID = @BatchID";
-                        SqlCommand updateCmd = new SqlCommand(updateBatchQuery, con, transaction);
-                        updateCmd.Parameters.AddWithValue("@Qty", item.Quantity);
-                        updateCmd.Parameters.AddWithValue("@BatchID", batchID);
-                        updateCmd.ExecuteNonQuery();
                     }
 
                     transaction.Commit();
@@ -519,5 +549,52 @@ namespace HardwareManagementSystem
 
         private void BtnLogout_Click(object sender, RoutedEventArgs e) { MainWindow loginWindow = new MainWindow(); loginWindow.Show(); this.Close(); }
         private void BtnSwitchToManager_Click(object sender, RoutedEventArgs e) { new MainDashboard(loggedInStaffID, loggedInStaffName).Show(); this.Close(); }
+
+        // ==========================================
+        // MANUAL / CUSTOM ITEM LOGIC
+        // ==========================================
+        private void BtnOpenManualItem_Click(object sender, RoutedEventArgs e)
+        {
+            TxtManualItemName.Clear();
+            TxtManualItemPrice.Clear();
+            TxtManualItemQuantity.Text = "1";
+            CmbManualItemUnit.SelectedIndex = 0;
+            ManualItemOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void BtnCancelManualItem_Click(object sender, RoutedEventArgs e)
+        {
+            ManualItemOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        private void BtnConfirmManualItem_Click(object sender, RoutedEventArgs e)
+        {
+            string name = TxtManualItemName.Text.Trim();
+
+            if (string.IsNullOrEmpty(name) || !decimal.TryParse(TxtManualItemPrice.Text, out decimal price) || !decimal.TryParse(TxtManualItemQuantity.Text, out decimal qty) || qty <= 0)
+            {
+                MessageBox.Show("Please enter a valid item name, price, and quantity.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Using a negative ID to denote this is a custom, non-database item
+            int tempCustomId = (ShoppingCart.Count + 1) * -1;
+            string unit = ((ComboBoxItem)CmbManualItemUnit.SelectedItem).Content.ToString();
+
+            ShoppingCart.Add(new CartItem
+            {
+                ProductID = tempCustomId,
+                ProductName = name + " (Custom)",
+                OriginalUnitPrice = price,
+                UnitPrice = price,
+                Quantity = qty,
+                SellingUnit = unit,
+                TotalPrice = price * qty
+            });
+
+            DgdCart.Items.Refresh();
+            CalculateTotals();
+            ManualItemOverlay.Visibility = Visibility.Collapsed;
+        }
     }
 }
