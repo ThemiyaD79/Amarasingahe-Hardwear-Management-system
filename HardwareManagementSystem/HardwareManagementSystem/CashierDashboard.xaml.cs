@@ -137,7 +137,22 @@ namespace HardwareManagementSystem
         private void TxtProductSearch_TextChanged(object sender, TextChangedEventArgs e) { ApplyFilters(); }
         private void TxtProductSearch_GotFocus(object sender, RoutedEventArgs e) { if (TxtProductSearch.Text == "Search products...") TxtProductSearch.Text = ""; }
         private void TxtProductSearch_LostFocus(object sender, RoutedEventArgs e) { if (string.IsNullOrWhiteSpace(TxtProductSearch.Text)) TxtProductSearch.Text = "Search products..."; }
-        private void Category_Click(object sender, RoutedEventArgs e) { } // Legacy button support
+
+        private void TxtProductSearch_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                if (IcProducts.Items.Count == 1)
+                {
+                    var product = IcProducts.Items[0] as Product;
+                    if (product != null)
+                    {
+                        HandleAddProductRequest(product);
+                        TxtProductSearch.Text = "";
+                    }
+                }
+            }
+        }
 
         private void BtnResetFilters_Click(object sender, RoutedEventArgs e)
         {
@@ -152,8 +167,13 @@ namespace HardwareManagementSystem
         private void BtnAddProduct_Click(object sender, RoutedEventArgs e)
         {
             Button clickedButton = sender as Button;
-            pendingProductToAdd = clickedButton.DataContext as Product;
+            Product prod = clickedButton.DataContext as Product;
+            HandleAddProductRequest(prod);
+        }
 
+        private void HandleAddProductRequest(Product prod)
+        {
+            pendingProductToAdd = prod;
             if (pendingProductToAdd != null)
             {
                 if (pendingProductToAdd.TotalQuantity <= 0)
@@ -403,9 +423,6 @@ namespace HardwareManagementSystem
             ProcessTransaction("Credit", debtorId, 0);
         }
 
-        // ==========================================
-        // UPDATED: TRANSACTION LOGIC TO FIX CUSTOM ITEMS
-        // ==========================================
         private void ProcessTransaction(string paymentType, int? debtorId, decimal cashGiven)
         {
             string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
@@ -442,10 +459,8 @@ namespace HardwareManagementSystem
                         int currentProductId = item.ProductID;
                         int batchID = 0;
 
-                        // FIX: Check if it's a Manual/Custom Item (Has a negative ID)
                         if (currentProductId < 0)
                         {
-                            // Create a hidden "One-Time" product in the DB to satisfy relationships (IsActive = 0)
                             string createDummyProd = "INSERT INTO Product (Name, Category, Brand, CurrentSellingPrice, TotalQuantity, ReorderLevel, IsActive, StaffID) VALUES (@n, 'Custom Item', 'Manual Entry', @p, 0, 0, 0, @sid); SELECT SCOPE_IDENTITY();";
                             SqlCommand dummyProdCmd = new SqlCommand(createDummyProd, con, transaction);
                             dummyProdCmd.Parameters.AddWithValue("@n", item.ProductName);
@@ -453,7 +468,6 @@ namespace HardwareManagementSystem
                             dummyProdCmd.Parameters.AddWithValue("@sid", loggedInStaffID);
                             currentProductId = Convert.ToInt32(dummyProdCmd.ExecuteScalar());
 
-                            // Create a dummy batch for it to satisfy relationships
                             string createDummyBatch = "INSERT INTO Batch (BatchNumber, CostPrice, InitialQuantity, CurrentQuantity, ManufacturingDate, ProductID, SupplierID) VALUES ('MANUAL', @p, 0, 0, GETDATE(), @pid, 1); SELECT SCOPE_IDENTITY();";
                             SqlCommand dummyBatchCmd = new SqlCommand(createDummyBatch, con, transaction);
                             dummyBatchCmd.Parameters.AddWithValue("@p", item.UnitPrice);
@@ -462,7 +476,6 @@ namespace HardwareManagementSystem
                         }
                         else
                         {
-                            // Normal Item Logic
                             string getBatchQuery = "SELECT TOP 1 BatchID FROM Batch WHERE ProductID = @ProductID AND CurrentQuantity >= @RequiredQty ORDER BY ManufacturingDate ASC";
                             SqlCommand batchCmd = new SqlCommand(getBatchQuery, con, transaction);
                             batchCmd.Parameters.AddWithValue("@ProductID", currentProductId);
@@ -479,7 +492,6 @@ namespace HardwareManagementSystem
                             updateCmd.ExecuteNonQuery();
                         }
 
-                        // Save Bill Item securely
                         SqlCommand itemCmd = new SqlCommand(insertBillItemQuery, con, transaction);
                         itemCmd.Parameters.AddWithValue("@Qty", item.Quantity);
                         itemCmd.Parameters.AddWithValue("@LineDiscount", item.LineDiscount);
@@ -567,6 +579,45 @@ namespace HardwareManagementSystem
             ManualItemOverlay.Visibility = Visibility.Collapsed;
         }
 
+        // 1. NEW LOGIC: SHOW THE SIZES WHEN LITER OR KG IS SELECTED
+        private void CmbManualItemUnit_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbManualItemUnit == null || SpManualItemSize == null || CmbManualItemSize == null) return;
+
+            ComboBoxItem selectedItem = CmbManualItemUnit.SelectedItem as ComboBoxItem;
+            if (selectedItem != null)
+            {
+                string unit = selectedItem.Content.ToString();
+                CmbManualItemSize.Items.Clear();
+
+                if (unit == "Liter")
+                {
+                    SpManualItemSize.Visibility = Visibility.Visible;
+                    CmbManualItemSize.Items.Add("1");
+                    CmbManualItemSize.Items.Add("4");
+                    CmbManualItemSize.Items.Add("10");
+                    CmbManualItemSize.Items.Add("20");
+                    CmbManualItemSize.SelectedIndex = 0;
+                }
+                else if (unit == "Kg")
+                {
+                    SpManualItemSize.Visibility = Visibility.Visible;
+                    CmbManualItemSize.Items.Add("0.5");
+                    CmbManualItemSize.Items.Add("1");
+                    CmbManualItemSize.Items.Add("5");
+                    CmbManualItemSize.Items.Add("25");
+                    CmbManualItemSize.Items.Add("50");
+                    CmbManualItemSize.SelectedIndex = 0;
+                }
+                else
+                {
+                    SpManualItemSize.Visibility = Visibility.Collapsed;
+                    CmbManualItemSize.Text = "";
+                }
+            }
+        }
+
+        // 2. UPDATED LOGIC: AUTOMATICALLY ADD "10L" OR "5Kg" TO THE NAME
         private void BtnConfirmManualItem_Click(object sender, RoutedEventArgs e)
         {
             string name = TxtManualItemName.Text.Trim();
@@ -577,9 +628,24 @@ namespace HardwareManagementSystem
                 return;
             }
 
-            // Using a negative ID to denote this is a custom, non-database item
-            int tempCustomId = (ShoppingCart.Count + 1) * -1;
             string unit = ((ComboBoxItem)CmbManualItemUnit.SelectedItem).Content.ToString();
+
+            // SMART SIZING
+            if (SpManualItemSize.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(CmbManualItemSize.Text))
+            {
+                string unitSuffix = "";
+                if (unit == "Liter") unitSuffix = "L";
+                else if (unit == "Kg") unitSuffix = "Kg";
+
+                string sizeAppend = $"{CmbManualItemSize.Text.Trim()}{unitSuffix}";
+
+                if (!name.EndsWith(sizeAppend, StringComparison.OrdinalIgnoreCase))
+                {
+                    name += $" {sizeAppend}";
+                }
+            }
+
+            int tempCustomId = (ShoppingCart.Count + 1) * -1;
 
             ShoppingCart.Add(new CartItem
             {
@@ -595,6 +661,51 @@ namespace HardwareManagementSystem
             DgdCart.Items.Refresh();
             CalculateTotals();
             ManualItemOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        // ==========================================
+        // QUANTITY +/- BUTTON LOGIC
+        // ==========================================
+        private void BtnDecreaseQty_Click(object sender, RoutedEventArgs e)
+        {
+            if (decimal.TryParse(TxtAddQuantity.Text, out decimal qty))
+            {
+                // Prevent going below 1 (or below 0.5 if it's a decimal item like Kg/Meter)
+                if (qty > 1)
+                {
+                    TxtAddQuantity.Text = (qty - 1).ToString("0.##");
+                }
+                else if (qty > 0 && qty <= 1)
+                {
+                    // For things sold in halves (0.5 Kg)
+                    TxtAddQuantity.Text = "0.5";
+                }
+            }
+            else
+            {
+                TxtAddQuantity.Text = "1";
+            }
+        }
+
+        private void BtnIncreaseQty_Click(object sender, RoutedEventArgs e)
+        {
+            if (decimal.TryParse(TxtAddQuantity.Text, out decimal qty))
+            {
+                if (pendingProductToAdd != null)
+                {
+                    // Check if adding 1 exceeds stock
+                    if (qty + 1 > pendingProductToAdd.TotalQuantity)
+                    {
+                        MessageBox.Show($"Cannot increase. Only {pendingProductToAdd.TotalQuantity:0.##} available in stock.", "Stock Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                TxtAddQuantity.Text = (qty + 1).ToString("0.##");
+            }
+            else
+            {
+                TxtAddQuantity.Text = "1";
+            }
         }
     }
 }

@@ -66,7 +66,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0" BorderBrush="#CBD5E0" BorderThickness="1" CornerRadius="5" Background="White">
-                            <TextBox x:Name="TxtProductSearch" Width="400" Padding="10,8" Background="Transparent" BorderThickness="0" VerticalContentAlignment="Center" Text="Search products..." TextChanged="TxtProductSearch_TextChanged" GotFocus="TxtProductSearch_GotFocus" LostFocus="TxtProductSearch_LostFocus"/>
+                            <TextBox x:Name="TxtProductSearch" Width="400" Padding="10,8" Background="Transparent" BorderThickness="0" VerticalContentAlignment="Center" Text="Search products..." TextChanged="TxtProductSearch_TextChanged" GotFocus="TxtProductSearch_GotFocus" LostFocus="TxtProductSearch_LostFocus" KeyDown="TxtProductSearch_KeyDown"/>
                         </Border>
 
                         <Button Grid.Column="2" Content="+ Add Manual Item" Background="#10B981" Foreground="White" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnOpenManualItem_Click"/>
@@ -78,7 +78,7 @@
                 <ItemsControl x:Name="IcProducts" HorizontalAlignment="Center">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel ItemWidth="220" ItemHeight="280" />
+                            <WrapPanel ItemWidth="220" ItemHeight="280" HorizontalAlignment="Left" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
@@ -211,10 +211,20 @@
                     <TextBlock x:Name="TxtAddProductName" Text="Product Name" FontWeight="ExtraBold" FontSize="18" Foreground="#0F172A" Margin="0,0,0,5" TextWrapping="Wrap" HorizontalAlignment="Center"/>
                     <TextBlock x:Name="TxtAddProductStock" Text="Stock Available: 0" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,0,0,20"/>
                     <TextBlock Text="Enter Quantity:" FontWeight="Bold" FontSize="12" Foreground="#64748B" Margin="0,0,0,5"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,25">
-                        <TextBox x:Name="TxtAddQuantity" Width="150" Padding="10" FontSize="18" Text="1" FontWeight="Bold" HorizontalContentAlignment="Center"/>
-                        <TextBlock x:Name="TxtAddUnit" Text="Unit" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="ExtraBold" FontSize="16" Foreground="#0F172A"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,25">
+                        <Border BorderBrush="#CBD5E0" BorderThickness="1" CornerRadius="4" Margin="0,0,15,0" Background="#FFFFFF">
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="BtnDecreaseQty" Content="-" Width="40" Height="40" Background="#F8FAFC" Foreground="#475569" BorderThickness="0,0,1,0" BorderBrush="#CBD5E0" FontSize="20" FontWeight="Bold" Cursor="Hand" Click="BtnDecreaseQty_Click"/>
+
+                                <TextBox x:Name="TxtAddQuantity" Width="60" Height="40" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="ExtraBold" Foreground="#0F172A" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Text="1"/>
+
+                                <Button x:Name="BtnIncreaseQty" Content="+" Width="40" Height="40" Background="#F8FAFC" Foreground="#475569" BorderThickness="1,0,0,0" BorderBrush="#CBD5E0" FontSize="20" FontWeight="Bold" Cursor="Hand" Click="BtnIncreaseQty_Click"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock x:Name="TxtAddUnit" Text="Unit" VerticalAlignment="Center" FontWeight="ExtraBold" FontSize="16" Foreground="#0F172A"/>
                     </StackPanel>
+
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -271,13 +281,22 @@
                         </StackPanel>
                     </Grid>
 
-                    <TextBlock Text="Selling Unit:" FontWeight="Bold" FontSize="12" Foreground="#64748B" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="CmbManualItemUnit" Padding="8" Margin="0,0,0,25">
-                        <ComboBoxItem Content="Piece" IsSelected="True"/>
-                        <ComboBoxItem Content="Meter"/>
-                        <ComboBoxItem Content="Kg"/>
-                        <ComboBoxItem Content="Liter"/>
-                    </ComboBox>
+                    <TextBlock Text="Selling Unit &amp; Size:" FontWeight="Bold" FontSize="12" Foreground="#64748B" Margin="0,0,0,5"/>
+                    <Grid Margin="0,0,0,25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="CmbManualItemUnit" Grid.Column="0" Padding="8" SelectionChanged="CmbManualItemUnit_SelectionChanged" Margin="0,0,5,0">
+                            <ComboBoxItem Content="Piece" IsSelected="True"/>
+                            <ComboBoxItem Content="Meter"/>
+                            <ComboBoxItem Content="Kg"/>
+                            <ComboBoxItem Content="Liter"/>
+                        </ComboBox>
+                        <StackPanel x:Name="SpManualItemSize" Grid.Column="1" Margin="5,0,0,0" Visibility="Collapsed">
+                            <ComboBox x:Name="CmbManualItemSize" IsEditable="True" Padding="8"/>
+                        </StackPanel>
+                    </Grid>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
