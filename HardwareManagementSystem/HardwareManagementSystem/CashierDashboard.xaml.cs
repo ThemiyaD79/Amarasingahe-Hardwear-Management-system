@@ -76,8 +76,8 @@ namespace HardwareManagementSystem
                             ImagePath = reader["ImagePath"] != DBNull.Value ? reader["ImagePath"].ToString() : null
                         });
                     }
-                    IcProducts.ItemsSource = AllProducts;
                     PopulateFilterCheckboxes();
+                    ApplyFilters();
                 }
             }
             catch (Exception ex)
@@ -86,6 +86,7 @@ namespace HardwareManagementSystem
             }
         }
 
+        // FIXED: The Bulletproof Sub-Category Space & Case Trimming Logic
         private void PopulateFilterCheckboxes()
         {
             if (SpCategories == null || SpSubCategories == null) return;
@@ -93,24 +94,54 @@ namespace HardwareManagementSystem
             SpCategories.Children.Clear();
             SpSubCategories.Children.Clear();
 
-            var categories = AllProducts.Where(p => !string.IsNullOrWhiteSpace(p.Category)).Select(p => p.Category).Distinct().ToList();
-            var subCategories = AllProducts.Where(p => !string.IsNullOrWhiteSpace(p.SubCategory)).Select(p => p.SubCategory).Distinct().ToList();
+            var categories = AllProducts
+                .Where(p => !string.IsNullOrWhiteSpace(p.Category))
+                .Select(p => p.Category.Trim())
+                .GroupBy(c => c.ToLower())
+                .Select(g => g.First())
+                .OrderBy(c => c)
+                .ToList();
+
+            var subCategories = AllProducts
+                .Where(p => !string.IsNullOrWhiteSpace(p.SubCategory))
+                .Select(p => p.SubCategory.Trim())
+                .GroupBy(s => s.ToLower())
+                .Select(g => g.First())
+                .OrderBy(s => s)
+                .ToList();
 
             foreach (var cat in categories)
             {
                 CheckBox cb = new CheckBox { Content = cat, Foreground = new SolidColorBrush(Color.FromRgb(51, 65, 85)), Margin = new Thickness(10, 4, 0, 4), FontSize = 14, Cursor = System.Windows.Input.Cursors.Hand };
-                cb.Checked += (s, e) => { activeCategories.Add(cat); ApplyFilters(); };
-                cb.Unchecked += (s, e) => { activeCategories.Remove(cat); ApplyFilters(); };
+                cb.Checked += (s, e) => { activeCategories.Add(cat.ToLower()); ApplyFilters(); };
+                cb.Unchecked += (s, e) => { activeCategories.Remove(cat.ToLower()); ApplyFilters(); };
                 SpCategories.Children.Add(cb);
             }
 
             foreach (var sub in subCategories)
             {
                 CheckBox cb = new CheckBox { Content = sub, Foreground = new SolidColorBrush(Color.FromRgb(51, 65, 85)), Margin = new Thickness(10, 4, 0, 4), FontSize = 14, Cursor = System.Windows.Input.Cursors.Hand };
-                cb.Checked += (s, e) => { activeSubCategories.Add(sub); ApplyFilters(); };
-                cb.Unchecked += (s, e) => { activeSubCategories.Remove(sub); ApplyFilters(); };
+                cb.Checked += (s, e) => { activeSubCategories.Add(sub.ToLower()); ApplyFilters(); };
+                cb.Unchecked += (s, e) => { activeSubCategories.Remove(sub.ToLower()); ApplyFilters(); };
                 SpSubCategories.Children.Add(cb);
             }
+        }
+
+        private string GetBaseName(string fullName)
+        {
+            if (string.IsNullOrEmpty(fullName)) return "";
+
+            string cleanName = fullName.Replace("(Copy)", "").Trim();
+
+            string[] sizes = { " 1L", " 4L", " 10L", " 20L", " 1Kg", " 5Kg", " 25Kg", " 50Kg", " 500ml", " 200ml" };
+            foreach (var size in sizes)
+            {
+                if (cleanName.EndsWith(size, StringComparison.OrdinalIgnoreCase))
+                {
+                    return cleanName.Substring(0, cleanName.Length - size.Length).Trim();
+                }
+            }
+            return cleanName;
         }
 
         private void ApplyFilters()
@@ -123,15 +154,26 @@ namespace HardwareManagementSystem
             var filtered = AllProducts.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(searchText))
-                filtered = filtered.Where(p => p.Name.ToLower().Contains(searchText) || p.Brand?.ToLower().Contains(searchText) == true);
+            {
+                filtered = filtered.Where(p => p.Name.ToLower().Contains(searchText) || (p.Brand != null && p.Brand.ToLower().Contains(searchText)));
+            }
 
             if (activeCategories.Count > 0)
-                filtered = filtered.Where(p => activeCategories.Contains(p.Category));
+            {
+                filtered = filtered.Where(p => !string.IsNullOrWhiteSpace(p.Category) && activeCategories.Contains(p.Category.Trim().ToLower()));
+            }
 
             if (activeSubCategories.Count > 0)
-                filtered = filtered.Where(p => activeSubCategories.Contains(p.SubCategory));
+            {
+                filtered = filtered.Where(p => !string.IsNullOrWhiteSpace(p.SubCategory) && activeSubCategories.Contains(p.SubCategory.Trim().ToLower()));
+            }
 
-            IcProducts.ItemsSource = new ObservableCollection<Product>(filtered);
+            var grouped = filtered
+                .GroupBy(p => GetBaseName(p.Name))
+                .Select(g => g.First())
+                .ToList();
+
+            IcProducts.ItemsSource = new ObservableCollection<Product>(grouped);
         }
 
         private void TxtProductSearch_TextChanged(object sender, TextChangedEventArgs e) { ApplyFilters(); }
@@ -173,24 +215,90 @@ namespace HardwareManagementSystem
 
         private void HandleAddProductRequest(Product prod)
         {
-            pendingProductToAdd = prod;
-            if (pendingProductToAdd != null)
+            if (prod == null) return;
+
+            string baseName = GetBaseName(prod.Name);
+            var matchingVariants = AllProducts.Where(p => GetBaseName(p.Name) == baseName).ToList();
+
+            if (matchingVariants.Count > 1)
             {
-                if (pendingProductToAdd.TotalQuantity <= 0)
+                SpVariantSelector.Visibility = Visibility.Visible;
+
+                var variantTiles = matchingVariants.Select(v => new VariantDisplayInfo
                 {
-                    MessageBox.Show("This item is currently out of stock!", "Out of Stock", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ProductData = v,
+                    ShortName = string.IsNullOrWhiteSpace(v.Name.Replace(baseName, "").Replace("(Copy)", "").Trim())
+                                ? "Base" : v.Name.Replace(baseName, "").Replace("(Copy)", "").Trim()
+                }).ToList();
+
+                LbxVariantSelect.ItemsSource = variantTiles;
+
+                var selected = variantTiles.FirstOrDefault(v => v.ProductData.ProductID == prod.ProductID);
+                LbxVariantSelect.SelectedItem = selected ?? variantTiles[0];
+            }
+            else
+            {
+                SpVariantSelector.Visibility = Visibility.Collapsed;
+                UpdateAddOverlayForProduct(prod);
+            }
+
+            TxtAddQuantity.Text = "1";
+            TxtAddQuantity.Focus();
+            TxtAddQuantity.SelectAll();
+
+            AddToCartOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void LbxVariantSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LbxVariantSelect.SelectedItem is VariantDisplayInfo selectedVariant)
+            {
+                UpdateAddOverlayForProduct(selectedVariant.ProductData);
+            }
+        }
+
+        private void UpdateAddOverlayForProduct(Product prod)
+        {
+            pendingProductToAdd = prod;
+            TxtAddProductName.Text = GetBaseName(pendingProductToAdd.Name);
+
+            TxtAddProductStock.Text = $"Stock: {pendingProductToAdd.TotalQuantity:0.##} {pendingProductToAdd.SellingUnit}s";
+            TxtAddProductPrice.Text = $"LKR {pendingProductToAdd.CurrentSellingPrice:N2}";
+            TxtAddUnit.Text = pendingProductToAdd.SellingUnit;
+
+            if (pendingProductToAdd.TotalQuantity <= 0)
+            {
+                TxtAddProductStock.Foreground = new SolidColorBrush(Colors.Red);
+                TxtAddProductStock.Text += " (OUT OF STOCK)";
+            }
+            else
+            {
+                TxtAddProductStock.Foreground = new SolidColorBrush(Color.FromRgb(100, 116, 139));
+            }
+        }
+
+        private void BtnDecreaseQty_Click(object sender, RoutedEventArgs e)
+        {
+            if (decimal.TryParse(TxtAddQuantity.Text, out decimal qty))
+            {
+                if (qty > 1) TxtAddQuantity.Text = (qty - 1).ToString("0.##");
+                else if (qty > 0 && qty <= 1) TxtAddQuantity.Text = "0.5";
+            }
+            else TxtAddQuantity.Text = "1";
+        }
+
+        private void BtnIncreaseQty_Click(object sender, RoutedEventArgs e)
+        {
+            if (decimal.TryParse(TxtAddQuantity.Text, out decimal qty))
+            {
+                if (pendingProductToAdd != null && qty + 1 > pendingProductToAdd.TotalQuantity)
+                {
+                    MessageBox.Show($"Cannot increase. Only {pendingProductToAdd.TotalQuantity:0.##} available in stock.", "Stock Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-
-                TxtAddProductName.Text = pendingProductToAdd.Name;
-                TxtAddProductStock.Text = $"Stock Available: {pendingProductToAdd.TotalQuantity:0.##} {pendingProductToAdd.SellingUnit}s";
-                TxtAddUnit.Text = pendingProductToAdd.SellingUnit;
-                TxtAddQuantity.Text = "1";
-                TxtAddQuantity.Focus();
-                TxtAddQuantity.SelectAll();
-
-                AddToCartOverlay.Visibility = Visibility.Visible;
+                TxtAddQuantity.Text = (qty + 1).ToString("0.##");
             }
+            else TxtAddQuantity.Text = "1";
         }
 
         private void BtnCancelAdd_Click(object sender, RoutedEventArgs e)
@@ -202,6 +310,12 @@ namespace HardwareManagementSystem
         private void BtnConfirmAdd_Click(object sender, RoutedEventArgs e)
         {
             if (pendingProductToAdd == null) return;
+
+            if (pendingProductToAdd.TotalQuantity <= 0)
+            {
+                MessageBox.Show("This specific variant is currently out of stock!", "Out of Stock", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             if (!decimal.TryParse(TxtAddQuantity.Text, out decimal desiredQty) || desiredQty <= 0)
             {
@@ -293,6 +407,101 @@ namespace HardwareManagementSystem
                 itemBeingEdited = null;
             }
             else { MessageBox.Show("Invalid numbers entered.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+
+        private void BtnOpenManualItem_Click(object sender, RoutedEventArgs e)
+        {
+            TxtManualItemName.Clear();
+            TxtManualItemPrice.Clear();
+            TxtManualItemQuantity.Text = "1";
+            CmbManualItemUnit.SelectedIndex = 0;
+            ManualItemOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void BtnCancelManualItem_Click(object sender, RoutedEventArgs e)
+        {
+            ManualItemOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        private void CmbManualItemUnit_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbManualItemUnit == null || SpManualItemSize == null || CmbManualItemSize == null) return;
+
+            ComboBoxItem selectedItem = CmbManualItemUnit.SelectedItem as ComboBoxItem;
+            if (selectedItem != null)
+            {
+                string unit = selectedItem.Content.ToString();
+                CmbManualItemSize.Items.Clear();
+
+                if (unit == "Liter")
+                {
+                    SpManualItemSize.Visibility = Visibility.Visible;
+                    CmbManualItemSize.Items.Add("1");
+                    CmbManualItemSize.Items.Add("4");
+                    CmbManualItemSize.Items.Add("10");
+                    CmbManualItemSize.Items.Add("20");
+                    CmbManualItemSize.SelectedIndex = 0;
+                }
+                else if (unit == "Kg")
+                {
+                    SpManualItemSize.Visibility = Visibility.Visible;
+                    CmbManualItemSize.Items.Add("0.5");
+                    CmbManualItemSize.Items.Add("1");
+                    CmbManualItemSize.Items.Add("5");
+                    CmbManualItemSize.Items.Add("25");
+                    CmbManualItemSize.Items.Add("50");
+                    CmbManualItemSize.SelectedIndex = 0;
+                }
+                else
+                {
+                    SpManualItemSize.Visibility = Visibility.Collapsed;
+                    CmbManualItemSize.Text = "";
+                }
+            }
+        }
+
+        private void BtnConfirmManualItem_Click(object sender, RoutedEventArgs e)
+        {
+            string name = TxtManualItemName.Text.Trim();
+
+            if (string.IsNullOrEmpty(name) || !decimal.TryParse(TxtManualItemPrice.Text, out decimal price) || !decimal.TryParse(TxtManualItemQuantity.Text, out decimal qty) || qty <= 0)
+            {
+                MessageBox.Show("Please enter a valid item name, price, and quantity.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string unit = ((ComboBoxItem)CmbManualItemUnit.SelectedItem).Content.ToString();
+
+            if (SpManualItemSize.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(CmbManualItemSize.Text))
+            {
+                string unitSuffix = "";
+                if (unit == "Liter") unitSuffix = "L";
+                else if (unit == "Kg") unitSuffix = "Kg";
+
+                string sizeAppend = $"{CmbManualItemSize.Text.Trim()}{unitSuffix}";
+
+                if (!name.EndsWith(sizeAppend, StringComparison.OrdinalIgnoreCase))
+                {
+                    name += $" {sizeAppend}";
+                }
+            }
+
+            int tempCustomId = (ShoppingCart.Count + 1) * -1;
+
+            ShoppingCart.Add(new CartItem
+            {
+                ProductID = tempCustomId,
+                ProductName = name + " (Custom)",
+                OriginalUnitPrice = price,
+                UnitPrice = price,
+                Quantity = qty,
+                SellingUnit = unit,
+                TotalPrice = price * qty
+            });
+
+            DgdCart.Items.Refresh();
+            CalculateTotals();
+            ManualItemOverlay.Visibility = Visibility.Collapsed;
         }
 
         private void CalculateTotals()
@@ -559,153 +768,28 @@ namespace HardwareManagementSystem
             catch (Exception ex) { ReceiptActionGrid.Visibility = Visibility.Visible; MessageBox.Show("Print failed: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
-        private void BtnLogout_Click(object sender, RoutedEventArgs e) { MainWindow loginWindow = new MainWindow(); loginWindow.Show(); this.Close(); }
-        private void BtnSwitchToManager_Click(object sender, RoutedEventArgs e) { new MainDashboard(loggedInStaffID, loggedInStaffName).Show(); this.Close(); }
-
-        // ==========================================
-        // MANUAL / CUSTOM ITEM LOGIC
-        // ==========================================
-        private void BtnOpenManualItem_Click(object sender, RoutedEventArgs e)
+        private void BtnLogout_Click(object sender, RoutedEventArgs e)
         {
-            TxtManualItemName.Clear();
-            TxtManualItemPrice.Clear();
-            TxtManualItemQuantity.Text = "1";
-            CmbManualItemUnit.SelectedIndex = 0;
-            ManualItemOverlay.Visibility = Visibility.Visible;
+            MainWindow loginWindow = new MainWindow();
+            loginWindow.WindowState = this.WindowState;
+            if (this.WindowState == WindowState.Maximized) loginWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+            loginWindow.Show();
+            this.Close();
         }
 
-        private void BtnCancelManualItem_Click(object sender, RoutedEventArgs e)
+        private void BtnSwitchToManager_Click(object sender, RoutedEventArgs e)
         {
-            ManualItemOverlay.Visibility = Visibility.Collapsed;
+            MainDashboard md = new MainDashboard(loggedInStaffID, loggedInStaffName);
+            md.WindowState = this.WindowState;
+            if (this.WindowState == WindowState.Maximized) md.WindowStartupLocation = WindowStartupLocation.Manual;
+            md.Show();
+            this.Close();
         }
+    }
 
-        // 1. NEW LOGIC: SHOW THE SIZES WHEN LITER OR KG IS SELECTED
-        private void CmbManualItemUnit_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (CmbManualItemUnit == null || SpManualItemSize == null || CmbManualItemSize == null) return;
-
-            ComboBoxItem selectedItem = CmbManualItemUnit.SelectedItem as ComboBoxItem;
-            if (selectedItem != null)
-            {
-                string unit = selectedItem.Content.ToString();
-                CmbManualItemSize.Items.Clear();
-
-                if (unit == "Liter")
-                {
-                    SpManualItemSize.Visibility = Visibility.Visible;
-                    CmbManualItemSize.Items.Add("1");
-                    CmbManualItemSize.Items.Add("4");
-                    CmbManualItemSize.Items.Add("10");
-                    CmbManualItemSize.Items.Add("20");
-                    CmbManualItemSize.SelectedIndex = 0;
-                }
-                else if (unit == "Kg")
-                {
-                    SpManualItemSize.Visibility = Visibility.Visible;
-                    CmbManualItemSize.Items.Add("0.5");
-                    CmbManualItemSize.Items.Add("1");
-                    CmbManualItemSize.Items.Add("5");
-                    CmbManualItemSize.Items.Add("25");
-                    CmbManualItemSize.Items.Add("50");
-                    CmbManualItemSize.SelectedIndex = 0;
-                }
-                else
-                {
-                    SpManualItemSize.Visibility = Visibility.Collapsed;
-                    CmbManualItemSize.Text = "";
-                }
-            }
-        }
-
-        // 2. UPDATED LOGIC: AUTOMATICALLY ADD "10L" OR "5Kg" TO THE NAME
-        private void BtnConfirmManualItem_Click(object sender, RoutedEventArgs e)
-        {
-            string name = TxtManualItemName.Text.Trim();
-
-            if (string.IsNullOrEmpty(name) || !decimal.TryParse(TxtManualItemPrice.Text, out decimal price) || !decimal.TryParse(TxtManualItemQuantity.Text, out decimal qty) || qty <= 0)
-            {
-                MessageBox.Show("Please enter a valid item name, price, and quantity.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            string unit = ((ComboBoxItem)CmbManualItemUnit.SelectedItem).Content.ToString();
-
-            // SMART SIZING
-            if (SpManualItemSize.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(CmbManualItemSize.Text))
-            {
-                string unitSuffix = "";
-                if (unit == "Liter") unitSuffix = "L";
-                else if (unit == "Kg") unitSuffix = "Kg";
-
-                string sizeAppend = $"{CmbManualItemSize.Text.Trim()}{unitSuffix}";
-
-                if (!name.EndsWith(sizeAppend, StringComparison.OrdinalIgnoreCase))
-                {
-                    name += $" {sizeAppend}";
-                }
-            }
-
-            int tempCustomId = (ShoppingCart.Count + 1) * -1;
-
-            ShoppingCart.Add(new CartItem
-            {
-                ProductID = tempCustomId,
-                ProductName = name + " (Custom)",
-                OriginalUnitPrice = price,
-                UnitPrice = price,
-                Quantity = qty,
-                SellingUnit = unit,
-                TotalPrice = price * qty
-            });
-
-            DgdCart.Items.Refresh();
-            CalculateTotals();
-            ManualItemOverlay.Visibility = Visibility.Collapsed;
-        }
-
-        // ==========================================
-        // QUANTITY +/- BUTTON LOGIC
-        // ==========================================
-        private void BtnDecreaseQty_Click(object sender, RoutedEventArgs e)
-        {
-            if (decimal.TryParse(TxtAddQuantity.Text, out decimal qty))
-            {
-                // Prevent going below 1 (or below 0.5 if it's a decimal item like Kg/Meter)
-                if (qty > 1)
-                {
-                    TxtAddQuantity.Text = (qty - 1).ToString("0.##");
-                }
-                else if (qty > 0 && qty <= 1)
-                {
-                    // For things sold in halves (0.5 Kg)
-                    TxtAddQuantity.Text = "0.5";
-                }
-            }
-            else
-            {
-                TxtAddQuantity.Text = "1";
-            }
-        }
-
-        private void BtnIncreaseQty_Click(object sender, RoutedEventArgs e)
-        {
-            if (decimal.TryParse(TxtAddQuantity.Text, out decimal qty))
-            {
-                if (pendingProductToAdd != null)
-                {
-                    // Check if adding 1 exceeds stock
-                    if (qty + 1 > pendingProductToAdd.TotalQuantity)
-                    {
-                        MessageBox.Show($"Cannot increase. Only {pendingProductToAdd.TotalQuantity:0.##} available in stock.", "Stock Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                }
-                TxtAddQuantity.Text = (qty + 1).ToString("0.##");
-            }
-            else
-            {
-                TxtAddQuantity.Text = "1";
-            }
-        }
+    public class VariantDisplayInfo
+    {
+        public Product ProductData { get; set; }
+        public string ShortName { get; set; }
     }
 }

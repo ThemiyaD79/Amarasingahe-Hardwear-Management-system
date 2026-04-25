@@ -70,8 +70,12 @@
 
         <Border Grid.Column="0" Background="{DynamicResource CardBg}" BorderBrush="#1A000000" BorderThickness="0,0,1,0">
             <StackPanel Margin="0,20,0,0">
-                <TextBlock Text="A. Hardware" Foreground="#0EA5E9" FontSize="22" FontWeight="ExtraBold" HorizontalAlignment="Center" Margin="0,10,0,30"/>
-                <TextBlock Text="MAIN MENU" Foreground="{DynamicResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="25,10,0,5"/>
+
+                    <StackPanel HorizontalAlignment="Center" Margin="0,10,0,30">
+                        <TextBlock Text="Amarasinghe" FontWeight="ExtraBold" FontSize="26" Foreground="#0EA5E9" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Hardware" FontWeight="Bold" FontSize="16" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+                    </StackPanel>
+                    <TextBlock Text="MAIN MENU" Foreground="{DynamicResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="25,10,0,5"/>
                 <Button Content="Home (Overview)" Style="{StaticResource SidebarButton}" x:Name="btnHomeNav" Click="btnHomeNav_Click"/>
                 <Button Content="Sales History" Style="{StaticResource SidebarButton}" x:Name="btnSalesNav" Click="btnSalesNav_Click"/>
                 <TextBlock Text="BUSINESS" Foreground="{DynamicResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="25,15,0,5"/>
@@ -89,6 +93,7 @@
         </Border>
 
         <Grid Grid.Column="1" Margin="30">
+
             <Grid x:Name="TabOverview" Visibility="Visible">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -279,8 +284,13 @@
                         <TextBlock Text="Sales History" FontWeight="ExtraBold" FontSize="32" Foreground="{DynamicResource TextMain}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <TextBlock Text="Filter by Cashier:" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontWeight="Bold" Margin="0,0,10,0"/>
-                        <ComboBox x:Name="CmbStaffFilter" Width="150" Margin="0,0,20,0" Padding="5" SelectionChanged="CmbStaffFilter_SelectionChanged"/>
+                        <TextBlock Text="From:" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <DatePicker x:Name="DpSalesFrom" Width="110" Margin="0,0,10,0"/>
+                        <TextBlock Text="To:" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <DatePicker x:Name="DpSalesTo" Width="110" Margin="0,0,20,0"/>
+                        <Button Content="Search" Background="#3B82F6" Foreground="White" Padding="15,5" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnFilterSalesHistory_Click" Margin="0,0,20,0"/>
+                        <TextBlock Text="Cashier:" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <ComboBox x:Name="CmbStaffFilter" Width="150" Padding="5" SelectionChanged="CmbStaffFilter_SelectionChanged"/>
                     </StackPanel>
                 </Grid>
                 <DataGrid x:Name="DgdSales" Grid.Row="1" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#1A000000" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" IsReadOnly="True" RowHeight="45" Foreground="{DynamicResource TextMain}">
@@ -365,9 +375,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                         <Button Content="📥 Restock (Add Batch)" Background="#3B82F6" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnOpenRestock_Click"/>
                         <Button Content="+ Add New Item" Background="#10B981" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnAddInventory_Click"/>
-
                         <Button Content="📋 Duplicate Selected" Background="#8B5CF6" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDuplicateInventory_Click"/>
-
                         <Button Content="Update Selected" Background="#F59E0B" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnEditInventory_Click"/>
                         <Button Content="Delete Selected" Background="#EF4444" Foreground="White" Padding="15,10" Margin="0,0,20,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDeleteInventory_Click"/>
                     </StackPanel>
@@ -561,13 +569,10 @@
                 <StackPanel>
                     <TextBlock Text="UPDATE SUPPLIER DEBT" FontWeight="ExtraBold" FontSize="16" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                     <TextBlock Text="Manually overwrite total balance owed" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-
                     <TextBlock Text="Select Supplier:" FontWeight="Bold" FontSize="12" Foreground="#64748B" Margin="0,0,0,5"/>
                     <ComboBox x:Name="CmbAdjustDebtSupplier" DisplayMemberPath="SupplierName" SelectedValuePath="SupplierID" Padding="5" Margin="0,0,0,15" SelectionChanged="CmbAdjustDebtSupplier_SelectionChanged"/>
-
                     <TextBlock Text="New Total Outstanding Balance (LKR):" FontWeight="Bold" FontSize="12" Foreground="#64748B" Margin="0,0,0,5"/>
                     <TextBox x:Name="TxtNewSupplierDebt" Padding="10" Margin="0,0,0,20" FontSize="14" FontWeight="Bold"/>
-
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -683,7 +688,6 @@
                         <Button Grid.Column="0" Content="🖨 Print Copy" Background="#0EA5E9" Foreground="White" Padding="10" Margin="0,0,5,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnPrintBill_Click"/>
                         <Button Grid.Column="1" Content="Close" Background="#E2E8F0" Foreground="#475569" Padding="10" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCloseBill_Click"/>
                     </Grid>
-
                 </StackPanel>
             </Border>
         </Grid>
@@ -707,14 +711,15 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,5,0">
                                     <TextBlock Text="Category:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
                                     <ComboBox x:Name="CmbInvCategory" IsEditable="True" DisplayMemberPath="Category" SelectedValuePath="Category" Padding="5"/>
                                 </StackPanel>
-                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                <StackPanel Grid.Column="1" Margin="5,0,5,0">
                                     <TextBlock Text="Selling Unit:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
-                                    <ComboBox x:Name="CmbSellingUnit" Padding="5">
+                                    <ComboBox x:Name="CmbSellingUnit" Padding="5" SelectionChanged="CmbSellingUnit_SelectionChanged">
                                         <ComboBoxItem Content="Piece" IsSelected="True"/>
                                         <ComboBoxItem Content="Meter"/>
                                         <ComboBoxItem Content="Kg"/>
@@ -723,6 +728,10 @@
                                         <ComboBoxItem Content="Bucket"/>
                                         <ComboBoxItem Content="Packet"/>
                                     </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="5,0,0,0" x:Name="SpItemSize" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtSizeLabel" Text="Size:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                                    <ComboBox x:Name="CmbItemSize" IsEditable="True" Padding="5"/>
                                 </StackPanel>
                             </Grid>
 
@@ -969,10 +978,16 @@
             <Border Background="White" Width="300" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20" CornerRadius="8">
                 <StackPanel>
                     <TextBlock Text="ADD NEW SUPPLIER" FontWeight="ExtraBold" FontSize="14" Foreground="#0F172A" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+
                     <TextBlock Text="Supplier Name:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
                     <TextBox x:Name="TxtQuickSupplierName" Padding="5" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Company Name:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
+                    <TextBox x:Name="TxtQuickSupplierCompany" Padding="5" Margin="0,0,0,10"/>
+
                     <TextBlock Text="Phone Number:" FontWeight="Bold" FontSize="11" Foreground="#64748B"/>
                     <TextBox x:Name="TxtQuickSupplierPhone" Padding="5" Margin="0,0,0,20"/>
+
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
