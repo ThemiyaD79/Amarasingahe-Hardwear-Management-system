@@ -68,28 +68,103 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{DynamicResource CardBg}" BorderBrush="#1A000000" BorderThickness="0,0,1,0">
-            <StackPanel Margin="0,20,0,0">
+        <Border Grid.Column="0" Background="#F4EFF8" BorderBrush="#E2E8F0" BorderThickness="0,0,1,0">
+            <Grid Margin="0,20,0,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                    <StackPanel HorizontalAlignment="Center" Margin="0,10,0,30">
-                        <TextBlock Text="Amarasinghe" FontWeight="ExtraBold" FontSize="26" Foreground="#0EA5E9" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Hardware" FontWeight="Bold" FontSize="16" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,10,0,20">
+                    <TextBlock Text="Amarasinghe" FontWeight="ExtraBold" FontSize="26" Foreground="#0EA5E9" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Hardware" FontWeight="Bold" FontSize="16" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                    <StackPanel>
+                        <TextBlock Text="Main Menu" Foreground="#6B7280" FontSize="13" FontWeight="Bold" Margin="25,10,0,10"/>
+
+                        <Button Style="{StaticResource SidebarButton}" x:Name="btnHomeNav" Click="btnHomeNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M2.01 3L2 10l15 2-15 2 .01 7L23 12 2.01 3z" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,15,0"/>
+                                <TextBlock Text="Home" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{StaticResource SidebarButton}" x:Name="btnSalesNav" Click="btnSalesNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M12.1 18.55L12 18.65L11.89 18.55C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5C9.04 5 10.54 6 11.07 7.36H12.93C13.46 6 14.96 5 16.5 5C18.5 5 20 6.5 20 8.5C20 11.39 16.86 14.24 12.1 18.55ZM16.5 3C14.76 3 13.09 3.81 12 5.08C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.41 2 8.5C2 12.27 5.4 15.36 10.55 20.03L12 21.35L13.45 20.03C18.6 15.36 22 12.27 22 8.5C22 5.41 19.58 3 16.5 3Z" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,15,0"/>
+                                <TextBlock Text="Sales History" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <TextBlock Text="Business" Foreground="#6B7280" FontSize="13" FontWeight="Bold" Margin="25,20,0,10"/>
+
+                        <Button Style="{StaticResource SidebarButton}" x:Name="btnDebtorsNav" Click="btnDebtorsNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,15,0"/>
+                                <TextBlock Text="Debtors" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{StaticResource SidebarButton}" x:Name="btnInventoryNav" Click="btnInventoryNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,15,0"/>
+                                <TextBlock Text="Inventory" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{StaticResource SidebarButton}" x:Name="btnSuppliersNav" Click="btnSuppliersNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,15,0"/>
+                                <TextBlock Text="Suppliers" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <TextBlock Text="Administration" Foreground="#6B7280" FontSize="13" FontWeight="Bold" Margin="25,20,0,10"/>
+
+                        <Button Style="{StaticResource SidebarButton}" x:Name="btnStaffNav" Click="btnStaffNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,15,0"/>
+                                <TextBlock Text="Staff Management" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{StaticResource SidebarButton}" x:Name="btnReportsNav" Click="btnReportsNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,15,0"/>
+                                <TextBlock Text="Reports" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{StaticResource SidebarButton}" x:Name="btnSettingsNav" Click="btnSettingsNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,15,0"/>
+                                <TextBlock Text="Settings" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
-                    <TextBlock Text="MAIN MENU" Foreground="{DynamicResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="25,10,0,5"/>
-                <Button Content="Home (Overview)" Style="{StaticResource SidebarButton}" x:Name="btnHomeNav" Click="btnHomeNav_Click"/>
-                <Button Content="Sales History" Style="{StaticResource SidebarButton}" x:Name="btnSalesNav" Click="btnSalesNav_Click"/>
-                <TextBlock Text="BUSINESS" Foreground="{DynamicResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="25,15,0,5"/>
-                <Button Content="Debtors (Credit)" Style="{StaticResource SidebarButton}" x:Name="btnDebtorsNav" Click="btnDebtorsNav_Click"/>
-                <Button Content="Inventory" Style="{StaticResource SidebarButton}" x:Name="btnInventoryNav" Click="btnInventoryNav_Click"/>
-                <Button Content="Suppliers" Style="{StaticResource SidebarButton}" x:Name="btnSuppliersNav" Click="btnSuppliersNav_Click"/>
-                <TextBlock Text="ADMINISTRATION" Foreground="{DynamicResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="25,15,0,5"/>
-                <Button Content="Staff Management" Style="{StaticResource SidebarButton}" x:Name="btnStaffNav" Click="btnStaffNav_Click"/>
-                <Button Content="Reports" Style="{StaticResource SidebarButton}" x:Name="btnReportsNav" Click="btnReportsNav_Click"/>
-                <Button Content="Settings" Style="{StaticResource SidebarButton}" x:Name="btnSettingsNav" Click="btnSettingsNav_Click"/>
-                <Border Height="1" Background="#1A000000" Margin="20,15"/>
-                <Button Content="Cashier Terminal" Style="{StaticResource SidebarButton}" x:Name="btnCashierNav" Click="btnCashierNav_Click" Foreground="#0EA5E9"/>
-                <Button Content="Logout" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Margin="20,15,20,0" Padding="12" FontWeight="Bold" Cursor="Hand" Click="btnLogout_Click"/>
-            </StackPanel>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="2" Margin="0,10,0,0">
+                    <Border Height="1" Background="#D1D5DB" Margin="25,0,25,15"/>
+                    <Button Style="{StaticResource SidebarButton}" x:Name="btnCashierNav" Click="btnCashierNav_Click">
+                        <TextBlock Text="Cashier Terminal" Foreground="#2563EB" FontWeight="Bold"/>
+                    </Button>
+
+                    <Button x:Name="btnLogout" Click="btnLogout_Click" Background="#F87171" Foreground="#7F1D1D" BorderThickness="0" Margin="25,15,25,0" Padding="0,12" FontWeight="Bold" Cursor="Hand" FontSize="15">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <TextBlock Text="Logout"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <Grid Grid.Column="1" Margin="30">
