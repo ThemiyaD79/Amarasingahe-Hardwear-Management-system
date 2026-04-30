@@ -16,7 +16,6 @@ namespace HardwareManagementSystem
         private ObservableCollection<Product> AllProducts { get; set; } = new ObservableCollection<Product>();
 
         private List<string> activeCategories = new List<string>();
-        private List<string> activeSubCategories = new List<string>();
 
         private decimal currentSubTotal = 0;
         private decimal currentLineDiscounts = 0;
@@ -86,13 +85,12 @@ namespace HardwareManagementSystem
             }
         }
 
-        // FIXED: The Bulletproof Sub-Category Space & Case Trimming Logic
+        // FIXED: The Bulletproof Category Space & Case Trimming Logic
         private void PopulateFilterCheckboxes()
         {
-            if (SpCategories == null || SpSubCategories == null) return;
+            if (SpCategories == null) return;
 
             SpCategories.Children.Clear();
-            SpSubCategories.Children.Clear();
 
             var categories = AllProducts
                 .Where(p => !string.IsNullOrWhiteSpace(p.Category))
@@ -102,28 +100,12 @@ namespace HardwareManagementSystem
                 .OrderBy(c => c)
                 .ToList();
 
-            var subCategories = AllProducts
-                .Where(p => !string.IsNullOrWhiteSpace(p.SubCategory))
-                .Select(p => p.SubCategory.Trim())
-                .GroupBy(s => s.ToLower())
-                .Select(g => g.First())
-                .OrderBy(s => s)
-                .ToList();
-
             foreach (var cat in categories)
             {
                 CheckBox cb = new CheckBox { Content = cat, Foreground = new SolidColorBrush(Color.FromRgb(51, 65, 85)), Margin = new Thickness(10, 4, 0, 4), FontSize = 14, Cursor = System.Windows.Input.Cursors.Hand };
                 cb.Checked += (s, e) => { activeCategories.Add(cat.ToLower()); ApplyFilters(); };
                 cb.Unchecked += (s, e) => { activeCategories.Remove(cat.ToLower()); ApplyFilters(); };
                 SpCategories.Children.Add(cb);
-            }
-
-            foreach (var sub in subCategories)
-            {
-                CheckBox cb = new CheckBox { Content = sub, Foreground = new SolidColorBrush(Color.FromRgb(51, 65, 85)), Margin = new Thickness(10, 4, 0, 4), FontSize = 14, Cursor = System.Windows.Input.Cursors.Hand };
-                cb.Checked += (s, e) => { activeSubCategories.Add(sub.ToLower()); ApplyFilters(); };
-                cb.Unchecked += (s, e) => { activeSubCategories.Remove(sub.ToLower()); ApplyFilters(); };
-                SpSubCategories.Children.Add(cb);
             }
         }
 
@@ -163,11 +145,6 @@ namespace HardwareManagementSystem
                 filtered = filtered.Where(p => !string.IsNullOrWhiteSpace(p.Category) && activeCategories.Contains(p.Category.Trim().ToLower()));
             }
 
-            if (activeSubCategories.Count > 0)
-            {
-                filtered = filtered.Where(p => !string.IsNullOrWhiteSpace(p.SubCategory) && activeSubCategories.Contains(p.SubCategory.Trim().ToLower()));
-            }
-
             var grouped = filtered
                 .GroupBy(p => GetBaseName(p.Name))
                 .Select(g => g.First())
@@ -199,10 +176,8 @@ namespace HardwareManagementSystem
         private void BtnResetFilters_Click(object sender, RoutedEventArgs e)
         {
             activeCategories.Clear();
-            activeSubCategories.Clear();
             TxtProductSearch.Text = "Search products...";
             foreach (var child in SpCategories.Children) { if (child is CheckBox cb) cb.IsChecked = false; }
-            foreach (var child in SpSubCategories.Children) { if (child is CheckBox cb) cb.IsChecked = false; }
             ApplyFilters();
         }
 
