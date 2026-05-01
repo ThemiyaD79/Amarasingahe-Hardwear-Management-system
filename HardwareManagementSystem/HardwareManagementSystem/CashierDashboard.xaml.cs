@@ -751,7 +751,7 @@ namespace HardwareManagementSystem
             loginWindow.Show();
             this.Close();
         }
-
+        //jhvuygu y guyfuyhgv vgv
         private void BtnSwitchToManager_Click(object sender, RoutedEventArgs e)
         {
             MainDashboard md = new MainDashboard(loggedInStaffID, loggedInStaffName);
