@@ -147,7 +147,7 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <StackPanel Grid.Row="2" Margin="0,10,0,0">
+                <StackPanel Grid.Row="2" Margin="0,10,0,0" VerticalAlignment="Bottom">
                     <Border Height="1" Background="#D1D5DB" Margin="25,0,25,15"/>
                     <Button Style="{StaticResource SidebarButton}" x:Name="btnCashierNav" Click="btnCashierNav_Click">
                         <TextBlock Text="Cashier Terminal" Foreground="#2563EB" FontWeight="Bold"/>
@@ -242,9 +242,13 @@
                                 <TextBlock x:Name="TxtGoalProgress" Text="0% of Daily Target" FontSize="11" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Right"/>
                             </StackPanel>
                             <Border Grid.Row="1" Background="{DynamicResource AppBg}" BorderBrush="#1A000000" BorderThickness="1" CornerRadius="8" Margin="0,20,0,0" Padding="15">
-                                <StackPanel>
-                                    <TextBlock Text="Current Inventory Status" FontWeight="Bold" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,10"/>
-                                    <DataGrid x:Name="DgdHomeInventory" AutoGenerateColumns="False" IsReadOnly="True" Height="150" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="Transparent" Foreground="{DynamicResource TextMain}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="Current Inventory Status" FontWeight="Bold" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,10"/>
+                                    <DataGrid Grid.Row="1" x:Name="DgdHomeInventory" AutoGenerateColumns="False" IsReadOnly="True" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="Transparent" Foreground="{DynamicResource TextMain}">
                                         <DataGrid.ColumnHeaderStyle>
                                             <Style TargetType="DataGridColumnHeader">
                                                 <Setter Property="Background" Value="Transparent"/>
@@ -258,19 +262,23 @@
                                             <DataGridTextColumn Header="Unit" Binding="{Binding SellingUnit}" Width="80"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
-                                </StackPanel>
+                                </Grid>
                             </Border>
                         </Grid>
                     </Border>
 
                     <Border Grid.Column="2" Style="{StaticResource DashboardCard}">
-                        <StackPanel>
-                            <Grid>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
                                 <TextBlock Text="Critical Low Stock Alerts" Style="{StaticResource CardTitle}" Foreground="#DC2626"/>
                                 <TextBlock x:Name="TxtTotalTransactions" Visibility="Collapsed"/>
                             </Grid>
 
-                            <DataGrid x:Name="DgdLowStock" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" IsReadOnly="True" RowHeight="35" Height="190" Margin="0,10,0,0">
+                            <DataGrid Grid.Row="1" x:Name="DgdLowStock" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" IsReadOnly="True" RowHeight="35" Margin="0,10,0,0">
                                 <DataGrid.ColumnHeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="Background" Value="#FEF2F2"/>
@@ -304,7 +312,7 @@
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
-                        </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
             </Grid>
@@ -575,9 +583,13 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Border Grid.Row="0" Style="{StaticResource DashboardCard}" Padding="15">
-                            <StackPanel>
-                                <TextBlock Text="Daily Performance" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
-                                <DataGrid x:Name="DgdFinancialSummary" AutoGenerateColumns="False" IsReadOnly="True" Height="200" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" Foreground="{DynamicResource TextMain}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Daily Performance" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
+                                <DataGrid Grid.Row="1" x:Name="DgdFinancialSummary" AutoGenerateColumns="False" IsReadOnly="True" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" Foreground="{DynamicResource TextMain}">
                                     <DataGrid.ColumnHeaderStyle>
                                         <Style TargetType="DataGridColumnHeader">
                                             <Setter Property="Background" Value="{DynamicResource AppBg}"/>
@@ -593,12 +605,16 @@
                                         <DataGridTextColumn Header="Profit" Binding="{Binding TotalProfit, StringFormat='N2'}" Width="100"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                         <Border Grid.Row="2" Style="{StaticResource DashboardCard}" Padding="15">
-                            <StackPanel>
-                                <TextBlock Text="Items Sold (Selected Period)" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
-                                <DataGrid x:Name="DgdItemsSoldReport" AutoGenerateColumns="False" IsReadOnly="True" Height="200" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" Foreground="{DynamicResource TextMain}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Items Sold (Selected Period)" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
+                                <DataGrid Grid.Row="1" x:Name="DgdItemsSoldReport" AutoGenerateColumns="False" IsReadOnly="True" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" Foreground="{DynamicResource TextMain}">
                                     <DataGrid.ColumnHeaderStyle>
                                         <Style TargetType="DataGridColumnHeader">
                                             <Setter Property="Background" Value="{DynamicResource AppBg}"/>
@@ -613,13 +629,17 @@
                                         <DataGridTextColumn Header="Revenue Generated" Binding="{Binding TotalRevenue, StringFormat='N2'}" Width="150"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </Grid>
                     <Border Grid.Column="2" Style="{StaticResource DashboardCard}" Padding="15">
-                        <StackPanel>
-                            <TextBlock Text="Cashier Sales" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
-                            <DataGrid x:Name="DgdCashierReport" AutoGenerateColumns="False" IsReadOnly="True" Height="420" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" Foreground="{DynamicResource TextMain}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Cashier Sales" Style="{StaticResource CardTitle}" Margin="0,0,0,10"/>
+                            <DataGrid Grid.Row="1" x:Name="DgdCashierReport" AutoGenerateColumns="False" IsReadOnly="True" Background="Transparent" BorderThickness="0" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" Foreground="{DynamicResource TextMain}">
                                 <DataGrid.ColumnHeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="Background" Value="{DynamicResource AppBg}"/>
@@ -633,7 +653,7 @@
                                     <DataGridTextColumn Header="Total Sales" Binding="{Binding TotalSales, StringFormat='N2'}" Width="100"/>
                                 </DataGrid.Columns>
                             </DataGrid>
-                        </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
             </Grid>

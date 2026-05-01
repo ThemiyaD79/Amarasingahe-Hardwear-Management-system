@@ -9,7 +9,7 @@ using System.Configuration;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using System.Windows.Media;
-
+//asijdhiuhd hwdhwqod wh q uhdwuhd
 namespace HardwareManagementSystem
 {
     public partial class MainDashboard : Window
