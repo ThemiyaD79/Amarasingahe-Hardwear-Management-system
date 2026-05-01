@@ -182,7 +182,7 @@ namespace HardwareManagementSystem
         }
 
         // ==========================================
-        // STAFF MANAGEMENT FIXES
+        // STAFF MANAGEMENT FIXES (DELETE AND VIEW ADDED)
         // ==========================================
         private void LoadStaff() { DgdStaff.ItemsSource = FetchData("SELECT StaffID, FullName, Username, Role, Phone, IsActive FROM Staff").DefaultView; }
 
@@ -298,19 +298,60 @@ namespace HardwareManagementSystem
         {
             if (DgdStaff.SelectedItem is DataRowView row)
             {
-                if (MessageBox.Show($"Are you sure you want to deactivate {row["FullName"]}?", "Confirm Deactivation", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                if (MessageBox.Show($"Are you sure you want to PERMANENTLY DELETE {row["FullName"]}?", "Confirm Deletion", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
                     try
                     {
                         using (SqlConnection con = new SqlConnection(connString))
                         {
                             con.Open();
-                            new SqlCommand($"UPDATE Staff SET IsActive = 0 WHERE StaffID = {row["StaffID"]}", con).ExecuteNonQuery();
+                            new SqlCommand($"DELETE FROM Staff WHERE StaffID = {row["StaffID"]}", con).ExecuteNonQuery();
                         }
                         LoadStaff();
-                        MessageBox.Show("User deactivated successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("User deleted successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
-                    catch (Exception ex) { MessageBox.Show("Error: " + ex.Message, "Database Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+                    catch (Exception ex) { MessageBox.Show("Error deleting user. They may be tied to existing bills or records: " + ex.Message, "Database Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select a staff member from the list first.", "Select User", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void BtnViewStaff_Click(object sender, RoutedEventArgs e)
+        {
+            if (DgdStaff.SelectedItem is DataRowView row)
+            {
+                try
+                {
+                    using (SqlConnection con = new SqlConnection(connString))
+                    {
+                        con.Open();
+                        SqlCommand cmd = new SqlCommand($"SELECT * FROM Staff WHERE StaffID = {row["StaffID"]}", con);
+                        SqlDataReader reader = cmd.ExecuteReader();
+
+                        if (reader.Read())
+                        {
+                            TxtViewStaffID.Text = reader["StaffID"].ToString();
+                            TxtViewFullName.Text = reader["FullName"].ToString();
+                            TxtViewUsername.Text = reader["Username"].ToString();
+                            TxtViewPassword.Text = reader["PasswordHash"].ToString();
+                            TxtViewRole.Text = reader["Role"].ToString();
+                            TxtViewDate.Text = reader["StartingDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartingDate"]).ToString("yyyy-MM-dd") : "N/A";
+                            TxtViewNIC.Text = reader["NIC"].ToString();
+                            TxtViewPhone.Text = reader["Phone"].ToString();
+                            TxtViewSalary.Text = reader["Salary"] != DBNull.Value ? Convert.ToDecimal(reader["Salary"]).ToString("N2") : "0.00";
+                            TxtViewAge.Text = reader["Age"].ToString();
+                            TxtViewStatus.Text = Convert.ToBoolean(reader["IsActive"]) ? "Active" : "Inactive";
+
+                            ViewStaffModalOverlay.Visibility = Visibility.Visible;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error retrieving data: " + ex.Message, "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
@@ -320,6 +361,7 @@ namespace HardwareManagementSystem
         }
 
         private void BtnCloseStaffModal_Click(object sender, RoutedEventArgs e) => StaffModalOverlay.Visibility = Visibility.Collapsed;
+        private void BtnCloseViewStaffModal_Click(object sender, RoutedEventArgs e) => ViewStaffModalOverlay.Visibility = Visibility.Collapsed;
 
         // ==========================================
         // ALL OTHER EXISTING LOGIC 
@@ -327,7 +369,7 @@ namespace HardwareManagementSystem
         private void LoadInventory() { DgdInventory.ItemsSource = FetchData("SELECT * FROM Product WHERE IsActive = 1").DefaultView; }
         private void BtnAddInventory_Click(object sender, RoutedEventArgs e) { TxtInvModalTitle.Text = "ADD NEW PRODUCT"; HiddenInvProductID.Text = ""; TxtInvName.Clear(); CmbInvCategory.Text = ""; TxtInvSubCategory.Clear(); TxtInvBrand.Clear(); TxtInvPrice.Clear(); TxtBatchQty.Clear(); TxtCostPrice.Clear(); TxtBatchNumber.Clear(); CmbSellingUnit.SelectedIndex = 0; CmbItemSize.Text = ""; CmbInvCategory.ItemsSource = FetchData("SELECT DISTINCT Category FROM Product WHERE Category IS NOT NULL").DefaultView; CmbInvSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; InventoryModalOverlay.Visibility = Visibility.Visible; }
         private void CmbSellingUnit_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (CmbSellingUnit == null || SpItemSize == null || CmbItemSize == null || TxtSizeLabel == null) return; ComboBoxItem selectedItem = CmbSellingUnit.SelectedItem as ComboBoxItem; if (selectedItem != null) { string unit = selectedItem.Content.ToString(); CmbItemSize.Items.Clear(); if (unit == "Liter") { SpItemSize.Visibility = Visibility.Visible; TxtSizeLabel.Text = "Volume (L):"; CmbItemSize.Items.Add("1"); CmbItemSize.Items.Add("4"); CmbItemSize.Items.Add("10"); CmbItemSize.Items.Add("20"); CmbItemSize.SelectedIndex = 0; } else if (unit == "Kg") { SpItemSize.Visibility = Visibility.Visible; TxtSizeLabel.Text = "Weight (Kg):"; CmbItemSize.Items.Add("0.5"); CmbItemSize.Items.Add("1"); CmbItemSize.Items.Add("5"); CmbItemSize.Items.Add("25"); CmbItemSize.Items.Add("50"); CmbItemSize.SelectedIndex = 0; } else { SpItemSize.Visibility = Visibility.Collapsed; CmbItemSize.Text = ""; } } }
-        private void BtnDuplicateInventory_Click(object sender, RoutedEventArgs e) { if (DgdInventory.SelectedItem is DataRowView row) { TxtInvModalTitle.Text = "DUPLICATE PRODUCT (Edit size/details)"; HiddenInvProductID.Text = ""; TxtInvName.Text = row["Name"].ToString() + " (Copy)"; CmbInvCategory.ItemsSource = FetchData("SELECT DISTINCT Category FROM Product WHERE Category IS NOT NULL").DefaultView; CmbInvCategory.Text = row["Category"].ToString(); TxtInvSubCategory.Text = row["SubCategory"].ToString(); CmbSellingUnit.Text = row["SellingUnit"].ToString(); TxtInvBrand.Text = row["Brand"].ToString(); TxtInvPrice.Text = row["CurrentSellingPrice"].ToString(); TxtInvReorder.Text = row["ReorderLevel"].ToString(); ChkInvActive.IsChecked = Convert.ToBoolean(row["IsActive"]); TxtBatchNumber.Clear(); TxtBatchQty.Clear(); TxtCostPrice.Clear(); CmbInvSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; InventoryModalOverlay.Visibility = Visibility.Visible; } else { MessageBox.Show("Please select an item to duplicate first.", "Select Item", MessageBoxButton.OK, MessageBoxImage.Information); } }
+        private void BtnDuplicateInventory_Click(object sender, RoutedEventArgs e) { if (DgdInventory.SelectedItem is DataRowView row) { TxtInvModalTitle.Text = "DUPLICATE PRODUCT (Edit size/details)"; HiddenInvProductID.Text = ""; TxtInvName.Text = row["Name"].ToString(); CmbInvCategory.ItemsSource = FetchData("SELECT DISTINCT Category FROM Product WHERE Category IS NOT NULL").DefaultView; CmbInvCategory.Text = row["Category"].ToString(); TxtInvSubCategory.Text = row["SubCategory"].ToString(); CmbSellingUnit.Text = row["SellingUnit"].ToString(); TxtInvBrand.Text = row["Brand"].ToString(); TxtInvPrice.Text = row["CurrentSellingPrice"].ToString(); TxtInvReorder.Text = row["ReorderLevel"].ToString(); ChkInvActive.IsChecked = Convert.ToBoolean(row["IsActive"]); TxtBatchNumber.Clear(); TxtBatchQty.Clear(); TxtCostPrice.Clear(); CmbInvSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; InventoryModalOverlay.Visibility = Visibility.Visible; } else { MessageBox.Show("Please select an item to duplicate first.", "Select Item", MessageBoxButton.OK, MessageBoxImage.Information); } }
         private void BtnEditInventory_Click(object sender, RoutedEventArgs e) { if (DgdInventory.SelectedItem is DataRowView row) { TxtInvModalTitle.Text = "UPDATE PRODUCT"; HiddenInvProductID.Text = row["ProductID"].ToString(); TxtInvName.Text = row["Name"].ToString(); CmbInvCategory.ItemsSource = FetchData("SELECT DISTINCT Category FROM Product WHERE Category IS NOT NULL").DefaultView; CmbInvCategory.Text = row["Category"].ToString(); TxtInvSubCategory.Text = row["SubCategory"].ToString(); CmbSellingUnit.Text = row["SellingUnit"].ToString(); TxtInvBrand.Text = row["Brand"].ToString(); TxtInvPrice.Text = row["CurrentSellingPrice"].ToString(); TxtInvReorder.Text = row["ReorderLevel"].ToString(); ChkInvActive.IsChecked = Convert.ToBoolean(row["IsActive"]); InventoryModalOverlay.Visibility = Visibility.Visible; } }
         private void BtnSaveInventory_Click(object sender, RoutedEventArgs e) { try { string rawCategory = CmbInvCategory.Text.Trim().ToLower(); if (rawCategory.Length > 0) rawCategory = char.ToUpper(rawCategory[0]) + rawCategory.Substring(1); string finalName = TxtInvName.Text.Trim(); if (SpItemSize.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(CmbItemSize.Text)) { string unitSuffix = ""; if (CmbSellingUnit.Text == "Liter") unitSuffix = "L"; else if (CmbSellingUnit.Text == "Kg") unitSuffix = "Kg"; string sizeAppend = $"{CmbItemSize.Text.Trim()}{unitSuffix}"; if (!finalName.EndsWith(sizeAppend, StringComparison.OrdinalIgnoreCase)) { finalName += $" {sizeAppend}"; } } Product p = new Product { ProductID = string.IsNullOrEmpty(HiddenInvProductID.Text) ? 0 : int.Parse(HiddenInvProductID.Text), Name = finalName, Category = rawCategory, SubCategory = TxtInvSubCategory.Text, Brand = TxtInvBrand.Text, SellingUnit = CmbSellingUnit.Text, CurrentSellingPrice = string.IsNullOrEmpty(TxtInvPrice.Text) ? 0 : decimal.Parse(TxtInvPrice.Text), ReorderLevel = string.IsNullOrEmpty(TxtInvReorder.Text) ? 0 : int.Parse(TxtInvReorder.Text), StaffID = loggedInStaffID, IsActive = ChkInvActive.IsChecked ?? true, ImagePath = HiddenImagePath.Text }; Batch b = new Batch { BatchNumber = TxtBatchNumber.Text, CostPrice = string.IsNullOrEmpty(TxtCostPrice.Text) ? 0 : decimal.Parse(TxtCostPrice.Text), InitialQuantity = string.IsNullOrEmpty(TxtBatchQty.Text) ? 0 : decimal.Parse(TxtBatchQty.Text) }; _inventoryService.ProcessProductInventory(p, b); if (p.ProductID == 0 && CmbInvSupplier.SelectedValue != null && !string.IsNullOrEmpty(TxtBatchNumber.Text)) { int supplierId = Convert.ToInt32(CmbInvSupplier.SelectedValue); string paymentMethod = ((ComboBoxItem)CmbInvPaymentType.SelectedItem).Content.ToString(); decimal totalBatchCost = b.InitialQuantity * b.CostPrice; using (SqlConnection con = new SqlConnection(connString)) { con.Open(); new SqlCommand($"UPDATE Batch SET SupplierID = {supplierId} WHERE BatchNumber = '{b.BatchNumber}'", con).ExecuteNonQuery(); if (paymentMethod.Contains("Credit")) { try { new SqlCommand($"UPDATE Supplier SET OutstandingBalance = ISNULL(OutstandingBalance, 0) + {totalBatchCost} WHERE SupplierID = {supplierId}", con).ExecuteNonQuery(); } catch { } } } } InventoryModalOverlay.Visibility = Visibility.Collapsed; LoadInventory(); RefreshDashboard(); LoadSuppliers(); MessageBox.Show("Product saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information); } catch (Exception ex) { MessageBox.Show("Error saving product: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); } }
         private void BtnDeleteInventory_Click(object sender, RoutedEventArgs e) { if (DgdInventory.SelectedItem is DataRowView row && MessageBox.Show("Delete this item?", "Confirm", MessageBoxButton.YesNo) == MessageBoxResult.Yes) { using (SqlConnection con = new SqlConnection(connString)) { con.Open(); new SqlCommand($"UPDATE Product SET IsActive = 0 WHERE ProductID = {row["ProductID"]}", con).ExecuteNonQuery(); } LoadInventory(); RefreshDashboard(); } }

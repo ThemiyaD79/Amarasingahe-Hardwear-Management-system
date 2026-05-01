@@ -413,6 +413,7 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                         <Button Content="+ Add New Staff" Background="#10B981" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnAddStaff_Click"/>
+                        <Button Content="View Selected" Background="#0EA5E9" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnViewStaff_Click"/>
                         <Button Content="Update Selected" Background="#F59E0B" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnEditStaff_Click"/>
                         <Button Content="Delete Selected" Background="#EF4444" Foreground="White" Padding="15,10" Margin="0,0,20,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDeleteStaff_Click"/>
                     </StackPanel>
@@ -952,6 +953,59 @@
                         <Button Grid.Column="0" Content="Cancel" Background="#E2E8F0" Foreground="#475569" Padding="10" Margin="0,0,5,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCloseStaffModal_Click"/>
                         <Button Grid.Column="1" Content="Save Staff" Background="#3B82F6" Foreground="White" Padding="10" Margin="5,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnSaveStaff_Click"/>
                     </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="ViewStaffModalOverlay" Grid.ColumnSpan="2" Background="#800F172A" Visibility="Collapsed" Panel.ZIndex="115">
+            <Border Background="White" Width="400" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30" CornerRadius="8">
+                <StackPanel>
+                    <TextBlock Text="STAFF DETAILS" FontWeight="ExtraBold" FontSize="18" Foreground="#0F172A" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="Staff ID:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                        <TextBlock x:Name="TxtViewStaffID" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="Full Name:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewFullName" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Username:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewUsername" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Password Hash:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewPassword" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+
+                            <TextBlock Text="Role:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewRole" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Starting Date:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewDate" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="NIC:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewNIC" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Phone:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewPhone" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Salary (LKR):" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewSalary" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Age:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewAge" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Status:" FontWeight="Bold" FontSize="12" Foreground="#64748B"/>
+                            <TextBlock x:Name="TxtViewStatus" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Button Content="Close" Background="#E2E8F0" Foreground="#475569" Padding="10" Margin="0,15,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnCloseViewStaffModal_Click"/>
                 </StackPanel>
             </Border>
         </Grid>
