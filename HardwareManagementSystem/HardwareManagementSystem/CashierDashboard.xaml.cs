@@ -750,14 +750,7 @@ namespace HardwareManagementSystem
             this.Close();
         }
         //jhvuygu y guyfuyhgv vgv
-        private void BtnSwitchToManager_Click(object sender, RoutedEventArgs e)
-        {
-            MainDashboard md = new MainDashboard(loggedInStaffID, loggedInStaffName);
-            md.WindowState = this.WindowState;
-            if (this.WindowState == WindowState.Maximized) md.WindowStartupLocation = WindowStartupLocation.Manual;
-            md.Show();
-            this.Close();
-        }
+       
     }
 
     public class VariantDisplayInfo
