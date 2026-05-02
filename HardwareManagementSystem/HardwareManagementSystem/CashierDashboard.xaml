@@ -104,7 +104,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-                        <Button Content="Switch To Manager" Background="#E0F2FE" Foreground="#0284C7" Padding="15,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnSwitchToManager_Click"/>
+                       
                         <TextBlock Text="Date: Today" Margin="20,0,0,0" VerticalAlignment="Center" Foreground="#64748B" FontWeight="SemiBold"/>
                         <TextBlock Text=" | Logged in as: " Margin="10,0,0,0" VerticalAlignment="Center" Foreground="#64748B"/>
                         <TextBlock x:Name="TxtCurrentUserName" Text="Cashier" VerticalAlignment="Center" Foreground="#0F172A" FontWeight="Bold"/>
