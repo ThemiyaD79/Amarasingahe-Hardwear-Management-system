@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace HardwareManagementSystem
 {
@@ -9,6 +11,19 @@ namespace HardwareManagementSystem
         private bool isUpdatingPassword = false;
 
         public MainWindow() { InitializeComponent(); }
+        private string HashPassword(string password)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                StringBuilder builder = new StringBuilder();
+                foreach (byte b in bytes)
+                {
+                    builder.Append(b.ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
 
         private void chkShowPassword_Click(object sender, RoutedEventArgs e)
         {
@@ -49,6 +64,7 @@ namespace HardwareManagementSystem
         private void btnLogin_Click(object sender, RoutedEventArgs e)
         {
             AuthService auth = new AuthService();
+
             Staff user = auth.Authenticate(txtUsername.Text, txtPassword.Password);
 
             if (user != null)
@@ -56,7 +72,6 @@ namespace HardwareManagementSystem
                 if (user.Role == "Manager" || user.Role == "Admin")
                 {
                     MainDashboard md = new MainDashboard(user.StaffID, user.FullName);
-                    // FIX: Carry over Window State
                     md.WindowState = this.WindowState;
                     if (this.WindowState == WindowState.Maximized) md.WindowStartupLocation = WindowStartupLocation.Manual;
                     md.Show();
@@ -64,7 +79,6 @@ namespace HardwareManagementSystem
                 else
                 {
                     CashierDashboard cd = new CashierDashboard(user.StaffID, user.FullName);
-                    // FIX: Carry over Window State
                     cd.WindowState = this.WindowState;
                     if (this.WindowState == WindowState.Maximized) cd.WindowStartupLocation = WindowStartupLocation.Manual;
                     cd.Show();

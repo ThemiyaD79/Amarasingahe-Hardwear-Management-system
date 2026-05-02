@@ -64,9 +64,8 @@ namespace HardwareManagementSystem
             }
         }
 
-        // ==========================================
-        // NEW METHOD: GET STOCK BY SUPPLIER
-        // ==========================================
+        // METHOD: GET STOCK BY SUPPLIER
+      
         public DataTable GetStockBySupplier(int supplierId)
         {
             string query = @"
@@ -93,10 +92,7 @@ namespace HardwareManagementSystem
             }
             return dt;
         }
-
-        // ==========================================
-        // NEW METHOD: GET LOW STOCK ITEMS (OOP)
-        // ==========================================
+        // NEW METHOD: get low stock item 
         public DataTable GetLowStockItems()
         {
             string query = @"

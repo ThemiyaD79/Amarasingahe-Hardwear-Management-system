@@ -84,8 +84,6 @@ namespace HardwareManagementSystem
                 MessageBox.Show("Database Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        // FIXED: The Bulletproof Category Space & Case Trimming Logic
         private void PopulateFilterCheckboxes()
         {
             if (SpCategories == null) return;
