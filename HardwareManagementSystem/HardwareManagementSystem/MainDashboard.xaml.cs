@@ -79,7 +79,7 @@ namespace HardwareManagementSystem
             this.Close();
         }
 
-        // REPORTS & PROFIT LOGIC 
+        // report genaration 
         private void LoadFinancialReports()
         {
             BtnFilterReports_Click(null, null);
@@ -179,7 +179,7 @@ namespace HardwareManagementSystem
             catch (Exception ex) { MessageBox.Show("Print Error: " + ex.Message); }
         }
 
-        // STAFF MANAGEMENT
+        // staff managment 
         private void LoadStaff() { DgdStaff.ItemsSource = FetchData("SELECT StaffID, FullName, Username, Role, Phone, IsActive FROM Staff").DefaultView; }
 
         private void BtnAddStaff_Click(object sender, RoutedEventArgs e)
@@ -371,7 +371,7 @@ namespace HardwareManagementSystem
         private void BtnCloseStaffModal_Click(object sender, RoutedEventArgs e) => StaffModalOverlay.Visibility = Visibility.Collapsed;
         private void BtnCloseViewStaffModal_Click(object sender, RoutedEventArgs e) => ViewStaffModalOverlay.Visibility = Visibility.Collapsed;
 
-        // INVENTORY MANAGEMENT LOGIC
+        // inventory managment 
         private void LoadInventory() { DgdInventory.ItemsSource = FetchData("SELECT * FROM Product WHERE IsActive = 1").DefaultView; }
         private void BtnAddInventory_Click(object sender, RoutedEventArgs e) { TxtInvModalTitle.Text = "ADD NEW PRODUCT"; HiddenInvProductID.Text = ""; TxtInvName.Clear(); CmbInvCategory.Text = ""; TxtInvSubCategory.Clear(); TxtInvBrand.Clear(); TxtInvPrice.Clear(); TxtBatchQty.Clear(); TxtCostPrice.Clear(); TxtBatchNumber.Clear(); CmbSellingUnit.SelectedIndex = 0; CmbItemSize.Text = ""; CmbInvCategory.ItemsSource = FetchData("SELECT DISTINCT Category FROM Product WHERE Category IS NOT NULL").DefaultView; CmbInvSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; InventoryModalOverlay.Visibility = Visibility.Visible; }
         private void CmbSellingUnit_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (CmbSellingUnit == null || SpItemSize == null || CmbItemSize == null || TxtSizeLabel == null) return; ComboBoxItem selectedItem = CmbSellingUnit.SelectedItem as ComboBoxItem; if (selectedItem != null) { string unit = selectedItem.Content.ToString(); CmbItemSize.Items.Clear(); if (unit == "Liter") { SpItemSize.Visibility = Visibility.Visible; TxtSizeLabel.Text = "Volume (L):"; CmbItemSize.Items.Add("1"); CmbItemSize.Items.Add("4"); CmbItemSize.Items.Add("10"); CmbItemSize.Items.Add("20"); CmbItemSize.SelectedIndex = 0; } else if (unit == "Kg") { SpItemSize.Visibility = Visibility.Visible; TxtSizeLabel.Text = "Weight (Kg):"; CmbItemSize.Items.Add("0.5"); CmbItemSize.Items.Add("1"); CmbItemSize.Items.Add("5"); CmbItemSize.Items.Add("25"); CmbItemSize.Items.Add("50"); CmbItemSize.SelectedIndex = 0; } else { SpItemSize.Visibility = Visibility.Collapsed; CmbItemSize.Text = ""; } } }
@@ -382,7 +382,7 @@ namespace HardwareManagementSystem
         {
             try
             {
-                // VALIDATION CHECK
+                // validation 
                 string finalName = TxtInvName.Text.Trim();
                 if (string.IsNullOrWhiteSpace(finalName) || string.IsNullOrWhiteSpace(CmbInvCategory.Text))
                 {
@@ -487,7 +487,7 @@ namespace HardwareManagementSystem
         private void BtnCloseInventoryModal_Click(object sender, RoutedEventArgs e) => InventoryModalOverlay.Visibility = Visibility.Collapsed;
         private void BtnBrowseImage_Click(object sender, RoutedEventArgs e) { OpenFileDialog op = new OpenFileDialog(); if (op.ShowDialog() == true) { ImgProductPreview.Source = new BitmapImage(new Uri(op.FileName)); HiddenImagePath.Text = op.FileName; } }
 
-        // RESTOCK LOGIC
+        // restock 
         private void BtnOpenRestock_Click(object sender, RoutedEventArgs e) { CmbRestockProduct.ItemsSource = FetchData("SELECT ProductID, Name, CurrentSellingPrice FROM Product WHERE IsActive = 1 ORDER BY Name").DefaultView; CmbRestockSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; TxtRestockBatchNo.Text = "GRN-" + DateTime.Now.ToString("yyyyMMdd-HHmm"); TxtRestockQty.Clear(); TxtRestockCost.Clear(); TxtRestockSellingPrice.Clear(); RestockModalOverlay.Visibility = Visibility.Visible; }
         private void BtnCloseRestock_Click(object sender, RoutedEventArgs e) { RestockModalOverlay.Visibility = Visibility.Collapsed; }
         private void CmbRestockProduct_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (CmbRestockProduct.SelectedItem is DataRowView row) { TxtRestockSellingPrice.Text = row["CurrentSellingPrice"].ToString(); } }
@@ -558,7 +558,8 @@ namespace HardwareManagementSystem
             catch (Exception ex) { MessageBox.Show("Error processing restock: " + ex.Message, "System Error", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
-        // SUPPLIER MANAGEMENT LOGIC 
+        // supplier manament logic 
+
         private void LoadSuppliers() { if (DgdSuppliers != null) { try { DgdSuppliers.ItemsSource = FetchData("SELECT SupplierID, SupplierName, CompanyName, Phone, Category, ISNULL(OutstandingBalance, 0) AS OutstandingBalance FROM Supplier ORDER BY SupplierName").DefaultView; } catch { DgdSuppliers.ItemsSource = FetchData("SELECT SupplierID, SupplierName, CompanyName, Phone, Category, 0.00 AS OutstandingBalance FROM Supplier ORDER BY SupplierName").DefaultView; } } }
 
         private void BtnQuickAddSupplier_Click(object sender, RoutedEventArgs e)
@@ -777,7 +778,7 @@ namespace HardwareManagementSystem
         private void BtnCancelSettle_Click(object sender, RoutedEventArgs e) => SettleDebtOverlay.Visibility = Visibility.Collapsed;
         private void TxtAmountPaying_TextChanged(object sender, TextChangedEventArgs e) { try { decimal total = decimal.Parse(TxtSettleTotalAmount.Text.Replace("LKR ", "")); decimal paying = string.IsNullOrEmpty(TxtAmountPaying.Text) ? 0 : decimal.Parse(TxtAmountPaying.Text); TxtRemainingBalance.Text = $"Balance After: LKR {(total - paying):N2}"; } catch { } }
 
-        // SALES HISTORY LOGIC
+        // sales history manament 
         private void LoadSales() { string query = "SELECT b.*, s.FullName as StaffName FROM Bill b JOIN Staff s ON b.StaffID = s.StaffID WHERE 1=1 "; if (DpSalesFrom != null && DpSalesFrom.SelectedDate.HasValue) query += $" AND b.Date >= '{DpSalesFrom.SelectedDate.Value:yyyy-MM-dd}' "; if (DpSalesTo != null && DpSalesTo.SelectedDate.HasValue) query += $" AND b.Date <= '{DpSalesTo.SelectedDate.Value:yyyy-MM-dd}' "; query += " ORDER BY b.Date DESC, b.Time DESC"; if (DgdSales != null) DgdSales.ItemsSource = FetchData(query).DefaultView; }
         private void BtnFilterSalesHistory_Click(object sender, RoutedEventArgs e) { LoadSales(); }
         private void BtnViewBill_Click(object sender, RoutedEventArgs e) { if (DgdSales.SelectedItem is DataRowView row) { TxtReceiptBillID.Text = "#" + row["BillID"].ToString(); DateTime date = Convert.ToDateTime(row["Date"]); TxtReceiptDate.Text = date.ToString("dd/MM/yyyy") + " " + row["Time"].ToString(); TxtReceiptTotal.Text = Convert.ToDecimal(row["GrandTotal"]).ToString("N2"); TxtReceiptCash.Text = row["PaymentType"].ToString(); string query = $"SELECT p.Name as ProductName, bi.QuantitySold as Quantity, (bi.SellingPriceAtTimeOfSale * bi.QuantitySold) as TotalPrice FROM Bill_Item bi JOIN Product p ON bi.ProductID = p.ProductID WHERE bi.BillID = {row["BillID"]}"; IcBillItems.ItemsSource = FetchData(query).DefaultView; BillViewerOverlay.Visibility = Visibility.Visible; } }
@@ -785,7 +786,7 @@ namespace HardwareManagementSystem
         private void BtnCloseBill_Click(object sender, RoutedEventArgs e) => BillViewerOverlay.Visibility = Visibility.Collapsed;
         private void CmbStaffFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) { LoadSales(); }
 
-        // SETTINGS & DASHBOARD LOGIC
+        // setting and dashboard logic 
         private void BtnCloseSettings_Click(object sender, RoutedEventArgs e) { SettingsModalOverlay.Visibility = Visibility.Collapsed; }
         private void BtnSaveSettings_Click(object sender, RoutedEventArgs e) { try { if (decimal.TryParse(TxtDailyGoal.Text, out decimal newGoal)) { _dailyGoal = newGoal; } } catch { } string selectedTheme = ((ComboBoxItem)CmbTheme.SelectedItem).Content.ToString(); if (selectedTheme == "Dark Mode") { this.Resources["AppBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F172A")); this.Resources["CardBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E293B")); this.Resources["TextMain"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F8FAFC")); this.Resources["TextMuted"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8")); } else { this.Resources["AppBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F1F5F9")); this.Resources["CardBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF")); this.Resources["TextMain"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F172A")); this.Resources["TextMuted"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#64748B")); } SettingsModalOverlay.Visibility = Visibility.Collapsed; RefreshDashboard(); MessageBox.Show("Settings saved and applied successfully!", "Settings Updated", MessageBoxButton.OK, MessageBoxImage.Information); }
         private void BtnBackupDB_Click(object sender, RoutedEventArgs e) { MessageBox.Show("Database backup initiated securely.", "Backup Status", MessageBoxButton.OK, MessageBoxImage.Information); }
