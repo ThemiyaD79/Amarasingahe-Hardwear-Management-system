@@ -43,22 +43,19 @@
             <ColumnDefinition Width="380"/>
         </Grid.ColumnDefinitions>
 
-        <!-- UPDATED LEFT SIDE PANEL -->
+        <!-- LEFT SIDE PANEL -->
         <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="0,0,1,0" Panel.ZIndex="10">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.05" Color="Black"/>
             </Border.Effect>
-            <!-- Using a Grid to properly manage available height and anchor the bottom button -->
+ 
             <Grid Margin="20,25,20,30">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <!-- Logo -->
                     <RowDefinition Height="Auto"/>
-                    <!-- Reset Button -->
                     <RowDefinition Height="Auto"/>
-                    <!-- Category Header -->
                     <RowDefinition Height="*"/>
-                    <!-- Category Filter List (Stretches to fill room) -->
                     <RowDefinition Height="Auto"/>
                     <!-- Logout Button -->
                 </Grid.RowDefinitions>

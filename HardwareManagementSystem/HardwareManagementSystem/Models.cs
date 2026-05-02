@@ -60,12 +60,11 @@ namespace HardwareManagementSystem
     {
         public int ProductID { get; set; }
         public string ProductName { get; set; }
-        public decimal OriginalUnitPrice { get; set; } // NEW: Tracks the true price
-        public decimal UnitPrice { get; set; } // The price after haggling
+        public decimal OriginalUnitPrice { get; set; } 
+        public decimal UnitPrice { get; set; } 
         public decimal Quantity { get; set; }
         public string SellingUnit { get; set; }
         public decimal TotalPrice { get; set; }
-        // Automatically calculates how much money was taken off this specific item
         public decimal LineDiscount => (OriginalUnitPrice - UnitPrice) * Quantity;
     }
 
