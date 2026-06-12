@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Configuration;
 
 namespace HardwareManagementSystem
@@ -11,32 +11,32 @@ namespace HardwareManagementSystem
 
         public void ProcessProductInventory(Product prod, Batch batch)
         {
-            using (SqlConnection con = new SqlConnection(connString))
+            using (SQLiteConnection con = new SQLiteConnection(connString))
             {
                 con.Open();
-                SqlTransaction trans = con.BeginTransaction();
+                SQLiteTransaction trans = con.BeginTransaction();
                 try
                 {
                     if (prod.ProductID == 0)
                     {
                         string pSql = @"INSERT INTO Product (Name, Category, Brand, CurrentSellingPrice, TotalQuantity, ReorderLevel, IsActive, StaffID, ImagePath) 
-                                        VALUES (@n, @c, @b, @price, @q, @r, @a, @sid, @img); SELECT SCOPE_IDENTITY();";
-                        SqlCommand cmd = new SqlCommand(pSql, con, trans);
+                                        VALUES (@n, @c, @b, @price, @q, @r, @a, @sid, @img); SELECT last_insert_rowid();";
+                        SQLiteCommand cmd = new SQLiteCommand(pSql, con, trans);
                         cmd.Parameters.AddWithValue("@n", prod.Name);
                         cmd.Parameters.AddWithValue("@c", prod.Category);
                         cmd.Parameters.AddWithValue("@b", prod.Brand);
                         cmd.Parameters.AddWithValue("@price", prod.CurrentSellingPrice);
                         cmd.Parameters.AddWithValue("@q", batch.InitialQuantity);
                         cmd.Parameters.AddWithValue("@r", prod.ReorderLevel);
-                        cmd.Parameters.AddWithValue("@a", prod.IsActive);
+                        cmd.Parameters.AddWithValue("@a", prod.IsActive ? 1 : 0);
                         cmd.Parameters.AddWithValue("@sid", prod.StaffID);
                         cmd.Parameters.AddWithValue("@img", prod.ImagePath ?? (object)DBNull.Value);
 
                         prod.ProductID = Convert.ToInt32(cmd.ExecuteScalar());
 
                         string bSql = @"INSERT INTO Batch (BatchNumber, CostPrice, InitialQuantity, CurrentQuantity, ManufacturingDate, ProductID, SupplierID) 
-                                        VALUES (@bn, @cp, @iq, @iq, GETDATE(), @pid, 1)";
-                        SqlCommand bCmd = new SqlCommand(bSql, con, trans);
+                                        VALUES (@bn, @cp, @iq, @iq, CURRENT_TIMESTAMP, @pid, 1)";
+                        SQLiteCommand bCmd = new SQLiteCommand(bSql, con, trans);
                         bCmd.Parameters.AddWithValue("@bn", batch.BatchNumber);
                         bCmd.Parameters.AddWithValue("@cp", batch.CostPrice);
                         bCmd.Parameters.AddWithValue("@iq", batch.InitialQuantity);
@@ -47,14 +47,14 @@ namespace HardwareManagementSystem
                     {
                         string uSql = @"UPDATE Product SET Name=@n, Category=@c, Brand=@b, CurrentSellingPrice=@price, 
                                         ReorderLevel=@r, IsActive=@a, ImagePath=@img WHERE ProductID=@id";
-                        SqlCommand uCmd = new SqlCommand(uSql, con, trans);
+                        SQLiteCommand uCmd = new SQLiteCommand(uSql, con, trans);
                         uCmd.Parameters.AddWithValue("@id", prod.ProductID);
                         uCmd.Parameters.AddWithValue("@n", prod.Name);
                         uCmd.Parameters.AddWithValue("@c", prod.Category);
                         uCmd.Parameters.AddWithValue("@b", prod.Brand);
                         uCmd.Parameters.AddWithValue("@price", prod.CurrentSellingPrice);
                         uCmd.Parameters.AddWithValue("@r", prod.ReorderLevel);
-                        uCmd.Parameters.AddWithValue("@a", prod.IsActive);
+                        uCmd.Parameters.AddWithValue("@a", prod.IsActive ? 1 : 0);
                         uCmd.Parameters.AddWithValue("@img", prod.ImagePath ?? (object)DBNull.Value);
                         uCmd.ExecuteNonQuery();
                     }
@@ -64,8 +64,6 @@ namespace HardwareManagementSystem
             }
         }
 
-        // METHOD: GET STOCK BY SUPPLIER
-      
         public DataTable GetStockBySupplier(int supplierId)
         {
             string query = @"
@@ -79,12 +77,12 @@ namespace HardwareManagementSystem
                 GROUP BY p.Name, p.SellingUnit";
 
             DataTable dt = new DataTable();
-            using (SqlConnection con = new SqlConnection(connString))
+            using (SQLiteConnection con = new SQLiteConnection(connString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@SupID", supplierId);
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (SQLiteDataAdapter da = new SQLiteDataAdapter(cmd))
                     {
                         da.Fill(dt);
                     }
@@ -92,7 +90,7 @@ namespace HardwareManagementSystem
             }
             return dt;
         }
-        // NEW METHOD: get low stock item 
+
         public DataTable GetLowStockItems()
         {
             string query = @"
@@ -102,11 +100,11 @@ namespace HardwareManagementSystem
                 ORDER BY TotalQuantity ASC";
 
             DataTable dt = new DataTable();
-            using (SqlConnection con = new SqlConnection(connString))
+            using (SQLiteConnection con = new SQLiteConnection(connString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
                 {
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (SQLiteDataAdapter da = new SQLiteDataAdapter(cmd))
                     {
                         da.Fill(dt);
                     }

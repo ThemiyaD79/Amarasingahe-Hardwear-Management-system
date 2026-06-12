@@ -69,7 +69,7 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" Background="#F4EFF8" BorderBrush="#E2E8F0" BorderThickness="0,0,1,0">
-            <Grid Margin="0,20,0,20">
+            <Grid Margin="0,20,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -81,7 +81,7 @@
                     <TextBlock Text="Hardware" FontWeight="Bold" FontSize="16" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
                 </StackPanel>
 
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Text="Main Menu" Foreground="#6B7280" FontSize="13" FontWeight="Bold" Margin="25,10,0,10"/>
 
@@ -147,7 +147,7 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <StackPanel Grid.Row="2" Margin="0,10,0,0" VerticalAlignment="Bottom">
+                <StackPanel Grid.Row="2" Margin="0,10,0,20" VerticalAlignment="Bottom">
                     <Border Height="1" Background="#D1D5DB" Margin="25,0,25,15"/>
                     <Button Style="{StaticResource SidebarButton}" x:Name="btnCashierNav" Click="btnCashierNav_Click">
                         <TextBlock Text="Cashier Terminal" Foreground="#2563EB" FontWeight="Bold"/>
@@ -449,6 +449,7 @@
             <Grid x:Name="TabInventory" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Margin="0,0,0,20">
@@ -464,7 +465,18 @@
                         <Button Content="Delete Selected" Background="#EF4444" Foreground="White" Padding="15,10" Margin="0,0,20,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDeleteInventory_Click"/>
                     </StackPanel>
                 </Grid>
-                <DataGrid x:Name="DgdInventory" Grid.Row="1" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#1A000000" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" IsReadOnly="True" RowHeight="45" Foreground="{DynamicResource TextMain}">
+                <Grid Grid.Row="1" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="350"/>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" BorderBrush="#CBD5E0" BorderThickness="1" CornerRadius="5" Background="White" Margin="0,0,15,0">
+                        <TextBox x:Name="TxtInventorySearch" Padding="10,8" Background="Transparent" BorderThickness="0" VerticalContentAlignment="Center" Text="Search items..." TextChanged="TxtInventorySearch_TextChanged" GotFocus="TxtInventorySearch_GotFocus" LostFocus="TxtInventorySearch_LostFocus"/>
+                    </Border>
+                    <ComboBox x:Name="CmbInventoryFilter" Grid.Column="1" Padding="8" SelectionChanged="CmbInventoryFilter_SelectionChanged"/>
+                </Grid>
+                <DataGrid x:Name="DgdInventory" Grid.Row="2" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#1A000000" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" IsReadOnly="True" RowHeight="45" Foreground="{DynamicResource TextMain}">
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="Background" Value="{DynamicResource AppBg}"/>
@@ -487,7 +499,14 @@
                         <DataGridTextColumn Header="Sub-Cat" Binding="{Binding SubCategory}" Width="100"/>
                         <DataGridTextColumn Header="Unit" Binding="{Binding SellingUnit}" Width="60"/>
                         <DataGridTextColumn Header="Price" Binding="{Binding CurrentSellingPrice, StringFormat='LKR {0:N2}'}" Width="100"/>
-                        <DataGridTextColumn Header="Qty" Binding="{Binding TotalQuantity}" Width="60"/>
+                        <DataGridTextColumn Header="Stock Left" Binding="{Binding StockLeft}" Width="80">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="#10B981"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                         <DataGridTextColumn Header="Reorder" Binding="{Binding ReorderLevel}" Width="60"/>
                         <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="50"/>
                     </DataGrid.Columns>
@@ -505,10 +524,8 @@
                         <TextBlock Text="Manage vendors and view supplied stock" Foreground="{DynamicResource TextMuted}" FontSize="16" Margin="0,5,0,0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <Button Content="Adjust Supplier Debt" Background="#F59E0B" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnOpenAdjustDebt_Click"/>
                         <Button Content="+ Add New Supplier" Background="#10B981" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnQuickAddSupplier_Click"/>
-                        <Button Content="Update Selected" Background="#F59E0B" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnEditSupplier_Click"/>
-                        <Button Content="Delete Selected" Background="#EF4444" Foreground="White" Padding="15,10" Margin="0,0,10,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnDeleteSupplier_Click"/>
-                        <Button Content="Adjust Supplier Debt" Background="#3B82F6" Foreground="White" Padding="15,10" Margin="0,0,0,0" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="BtnOpenAdjustDebt_Click"/>
                     </StackPanel>
                 </Grid>
                 <DataGrid x:Name="DgdSuppliers" Grid.Row="1" AutoGenerateColumns="False" HeadersVisibility="Column" Background="Transparent" BorderThickness="1" BorderBrush="#1A000000" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1A000000" RowBackground="{DynamicResource CardBg}" AlternatingRowBackground="{DynamicResource AppBg}" IsReadOnly="True" RowHeight="45" Foreground="{DynamicResource TextMain}">
