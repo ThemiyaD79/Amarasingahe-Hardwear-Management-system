@@ -4,7 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Configuration;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
@@ -79,7 +79,7 @@ namespace HardwareManagementSystem
             this.Close();
         }
 
-        // report genaration 
+        // REPORTS & PROFIT LOGIC 
         private void LoadFinancialReports()
         {
             BtnFilterReports_Click(null, null);
@@ -93,14 +93,14 @@ namespace HardwareManagementSystem
                 string toDate = DpReportTo.SelectedDate.Value.ToString("yyyy-MM-dd");
 
                 string dailyQuery = $@"
-                    SELECT CAST(b.Date AS DATE) as Date, COUNT(DISTINCT b.BillID) as TotalBills, 
+                    SELECT date(b.Date) as Date, COUNT(DISTINCT b.BillID) as TotalBills, 
                            SUM(bi.QuantitySold * bi.SellingPriceAtTimeOfSale) as TotalRevenue, 
-                           SUM((bi.SellingPriceAtTimeOfSale - ISNULL(ba.CostPrice, 0)) * bi.QuantitySold) as TotalProfit 
+                           SUM((bi.SellingPriceAtTimeOfSale - IFNULL(ba.CostPrice, 0)) * bi.QuantitySold) as TotalProfit 
                     FROM Bill b 
                     JOIN Bill_Item bi ON b.BillID = bi.BillID 
                     LEFT JOIN Batch ba ON bi.BatchID = ba.BatchID 
                     WHERE b.Date >= '{fromDate}' AND b.Date <= '{toDate}' AND b.Status = 'Completed'
-                    GROUP BY CAST(b.Date AS DATE) ORDER BY Date DESC";
+                    GROUP BY date(b.Date) ORDER BY Date DESC";
 
                 if (DgdFinancialSummary != null) DgdFinancialSummary.ItemsSource = FetchData(dailyQuery).DefaultView;
 
@@ -126,7 +126,7 @@ namespace HardwareManagementSystem
             try
             {
                 string query = $@"
-                    SELECT bi.QuantitySold, bi.SellingPriceAtTimeOfSale, ISNULL(ba.CostPrice, 0) as CostPrice 
+                    SELECT bi.QuantitySold, bi.SellingPriceAtTimeOfSale, IFNULL(ba.CostPrice, 0) as CostPrice 
                     FROM Bill b 
                     JOIN Bill_Item bi ON b.BillID = bi.BillID 
                     LEFT JOIN Batch ba ON bi.BatchID = ba.BatchID 
@@ -179,7 +179,7 @@ namespace HardwareManagementSystem
             catch (Exception ex) { MessageBox.Show("Print Error: " + ex.Message); }
         }
 
-        // staff managment 
+        // STAFF MANAGEMENT
         private void LoadStaff() { DgdStaff.ItemsSource = FetchData("SELECT StaffID, FullName, Username, Role, Phone, IsActive FROM Staff").DefaultView; }
 
         private void BtnAddStaff_Click(object sender, RoutedEventArgs e)
@@ -240,7 +240,7 @@ namespace HardwareManagementSystem
 
                 int isActive = (ChkStaffActive.IsChecked == true) ? 1 : 0;
 
-                using (SqlConnection con = new SqlConnection(connString))
+                using (SQLiteConnection con = new SQLiteConnection(connString))
                 {
                     con.Open();
 
@@ -253,9 +253,9 @@ namespace HardwareManagementSystem
                         }
 
                         string query = @"INSERT INTO Staff (FullName, NIC, Phone, Username, PasswordHash, Role, Salary, StartingDate, Age, IsActive) 
-                                         VALUES (@FN, @NIC, @Phone, @UN, @Pass, @Role, @Sal, CAST(GETDATE() AS DATE), @Age, @Act)";
+                                         VALUES (@FN, @NIC, @Phone, @UN, @Pass, @Role, @Sal, CURRENT_DATE, @Age, @Act)";
 
-                        SqlCommand cmd = new SqlCommand(query, con);
+                        SQLiteCommand cmd = new SQLiteCommand(query, con);
                         cmd.Parameters.AddWithValue("@FN", fullName);
                         cmd.Parameters.AddWithValue("@NIC", nic);
                         cmd.Parameters.AddWithValue("@Phone", phone);
@@ -275,7 +275,7 @@ namespace HardwareManagementSystem
                         if (!string.IsNullOrEmpty(password)) query += ", PasswordHash=@Pass ";
                         query += " WHERE StaffID=@ID";
 
-                        SqlCommand cmd = new SqlCommand(query, con);
+                        SQLiteCommand cmd = new SQLiteCommand(query, con);
                         cmd.Parameters.AddWithValue("@FN", fullName);
                         cmd.Parameters.AddWithValue("@NIC", nic);
                         cmd.Parameters.AddWithValue("@Phone", phone);
@@ -310,10 +310,10 @@ namespace HardwareManagementSystem
                 {
                     try
                     {
-                        using (SqlConnection con = new SqlConnection(connString))
+                        using (SQLiteConnection con = new SQLiteConnection(connString))
                         {
                             con.Open();
-                            new SqlCommand($"DELETE FROM Staff WHERE StaffID = {row["StaffID"]}", con).ExecuteNonQuery();
+                            new SQLiteCommand($"DELETE FROM Staff WHERE StaffID = {row["StaffID"]}", con).ExecuteNonQuery();
                         }
                         LoadStaff();
                         MessageBox.Show("User deleted successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -333,11 +333,11 @@ namespace HardwareManagementSystem
             {
                 try
                 {
-                    using (SqlConnection con = new SqlConnection(connString))
+                    using (SQLiteConnection con = new SQLiteConnection(connString))
                     {
                         con.Open();
-                        SqlCommand cmd = new SqlCommand($"SELECT * FROM Staff WHERE StaffID = {row["StaffID"]}", con);
-                        SqlDataReader reader = cmd.ExecuteReader();
+                        SQLiteCommand cmd = new SQLiteCommand($"SELECT * FROM Staff WHERE StaffID = {row["StaffID"]}", con);
+                        SQLiteDataReader reader = cmd.ExecuteReader();
 
                         if (reader.Read())
                         {
@@ -371,8 +371,74 @@ namespace HardwareManagementSystem
         private void BtnCloseStaffModal_Click(object sender, RoutedEventArgs e) => StaffModalOverlay.Visibility = Visibility.Collapsed;
         private void BtnCloseViewStaffModal_Click(object sender, RoutedEventArgs e) => ViewStaffModalOverlay.Visibility = Visibility.Collapsed;
 
-        // inventory managment 
-        private void LoadInventory() { DgdInventory.ItemsSource = FetchData("SELECT * FROM Product WHERE IsActive = 1").DefaultView; }
+        // INVENTORY MANAGEMENT LOGIC
+        private void LoadInventory()
+        {
+            string query = @"
+                SELECT p.ProductID, p.Name, p.Category, p.SubCategory, p.Brand, p.SellingUnit, 
+                       p.CurrentSellingPrice, p.ReorderLevel, p.IsActive, p.ImagePath, 
+                       IFNULL(SUM(b.CurrentQuantity), 0) AS StockLeft 
+                FROM Product p 
+                LEFT JOIN Batch b ON p.ProductID = b.ProductID 
+                WHERE p.IsActive = 1 
+                GROUP BY p.ProductID, p.Name, p.Category, p.SubCategory, p.Brand, p.SellingUnit, 
+                         p.CurrentSellingPrice, p.ReorderLevel, p.IsActive, p.ImagePath";
+
+            DgdInventory.ItemsSource = FetchData(query).DefaultView;
+
+            if (CmbInventoryFilter != null && CmbInventoryFilter.Items.Count <= 1)
+            {
+                CmbInventoryFilter.SelectionChanged -= CmbInventoryFilter_SelectionChanged;
+
+                CmbInventoryFilter.Items.Clear();
+                CmbInventoryFilter.Items.Add("All Categories");
+
+                DataTable catDt = FetchData("SELECT DISTINCT Category FROM Product WHERE Category IS NOT NULL AND IsActive = 1 ORDER BY Category");
+                foreach (DataRow r in catDt.Rows)
+                {
+                    CmbInventoryFilter.Items.Add(r["Category"].ToString());
+                }
+
+                CmbInventoryFilter.SelectedIndex = 0;
+                CmbInventoryFilter.SelectionChanged += CmbInventoryFilter_SelectionChanged;
+            }
+        }
+
+        private void FilterInventory()
+        {
+            if (DgdInventory == null) return;
+
+            string query = @"
+                SELECT p.ProductID, p.Name, p.Category, p.SubCategory, p.Brand, p.SellingUnit, 
+                       p.CurrentSellingPrice, p.ReorderLevel, p.IsActive, p.ImagePath, 
+                       IFNULL(SUM(b.CurrentQuantity), 0) AS StockLeft 
+                FROM Product p 
+                LEFT JOIN Batch b ON p.ProductID = b.ProductID 
+                WHERE p.IsActive = 1 ";
+
+            if (TxtInventorySearch != null && !string.IsNullOrWhiteSpace(TxtInventorySearch.Text) && TxtInventorySearch.Text != "Search items...")
+            {
+                string search = TxtInventorySearch.Text.Trim().Replace("'", "''");
+                query += $" AND (p.Name LIKE '%{search}%' OR p.ProductID LIKE '%{search}%' OR p.Brand LIKE '%{search}%') ";
+            }
+
+            if (CmbInventoryFilter != null && CmbInventoryFilter.SelectedItem != null && CmbInventoryFilter.SelectedItem.ToString() != "All Categories")
+            {
+                string cat = CmbInventoryFilter.SelectedItem.ToString().Replace("'", "''");
+                query += $" AND p.Category = '{cat}' ";
+            }
+
+            query += @" GROUP BY p.ProductID, p.Name, p.Category, p.SubCategory, p.Brand, p.SellingUnit, 
+                         p.CurrentSellingPrice, p.ReorderLevel, p.IsActive, p.ImagePath";
+
+            DgdInventory.ItemsSource = FetchData(query).DefaultView;
+        }
+
+        private void TxtInventorySearch_TextChanged(object sender, TextChangedEventArgs e) { FilterInventory(); }
+        private void TxtInventorySearch_GotFocus(object sender, RoutedEventArgs e) { if (TxtInventorySearch.Text == "Search items...") TxtInventorySearch.Text = ""; }
+        private void TxtInventorySearch_LostFocus(object sender, RoutedEventArgs e) { if (string.IsNullOrWhiteSpace(TxtInventorySearch.Text)) TxtInventorySearch.Text = "Search items..."; }
+        private void CmbInventoryFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) { FilterInventory(); }
+
         private void BtnAddInventory_Click(object sender, RoutedEventArgs e) { TxtInvModalTitle.Text = "ADD NEW PRODUCT"; HiddenInvProductID.Text = ""; TxtInvName.Clear(); CmbInvCategory.Text = ""; TxtInvSubCategory.Clear(); TxtInvBrand.Clear(); TxtInvPrice.Clear(); TxtBatchQty.Clear(); TxtCostPrice.Clear(); TxtBatchNumber.Clear(); CmbSellingUnit.SelectedIndex = 0; CmbItemSize.Text = ""; CmbInvCategory.ItemsSource = FetchData("SELECT DISTINCT Category FROM Product WHERE Category IS NOT NULL").DefaultView; CmbInvSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; InventoryModalOverlay.Visibility = Visibility.Visible; }
         private void CmbSellingUnit_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (CmbSellingUnit == null || SpItemSize == null || CmbItemSize == null || TxtSizeLabel == null) return; ComboBoxItem selectedItem = CmbSellingUnit.SelectedItem as ComboBoxItem; if (selectedItem != null) { string unit = selectedItem.Content.ToString(); CmbItemSize.Items.Clear(); if (unit == "Liter") { SpItemSize.Visibility = Visibility.Visible; TxtSizeLabel.Text = "Volume (L):"; CmbItemSize.Items.Add("1"); CmbItemSize.Items.Add("4"); CmbItemSize.Items.Add("10"); CmbItemSize.Items.Add("20"); CmbItemSize.SelectedIndex = 0; } else if (unit == "Kg") { SpItemSize.Visibility = Visibility.Visible; TxtSizeLabel.Text = "Weight (Kg):"; CmbItemSize.Items.Add("0.5"); CmbItemSize.Items.Add("1"); CmbItemSize.Items.Add("5"); CmbItemSize.Items.Add("25"); CmbItemSize.Items.Add("50"); CmbItemSize.SelectedIndex = 0; } else { SpItemSize.Visibility = Visibility.Collapsed; CmbItemSize.Text = ""; } } }
         private void BtnDuplicateInventory_Click(object sender, RoutedEventArgs e) { if (DgdInventory.SelectedItem is DataRowView row) { TxtInvModalTitle.Text = "DUPLICATE PRODUCT (Edit size/details)"; HiddenInvProductID.Text = ""; TxtInvName.Text = row["Name"].ToString(); CmbInvCategory.ItemsSource = FetchData("SELECT DISTINCT Category FROM Product WHERE Category IS NOT NULL").DefaultView; CmbInvCategory.Text = row["Category"].ToString(); TxtInvSubCategory.Text = row["SubCategory"].ToString(); CmbSellingUnit.Text = row["SellingUnit"].ToString(); TxtInvBrand.Text = row["Brand"].ToString(); TxtInvPrice.Text = row["CurrentSellingPrice"].ToString(); TxtInvReorder.Text = row["ReorderLevel"].ToString(); ChkInvActive.IsChecked = Convert.ToBoolean(row["IsActive"]); TxtBatchNumber.Clear(); TxtBatchQty.Clear(); TxtCostPrice.Clear(); CmbInvSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; InventoryModalOverlay.Visibility = Visibility.Visible; } else { MessageBox.Show("Please select an item to duplicate first.", "Select Item", MessageBoxButton.OK, MessageBoxImage.Information); } }
@@ -382,7 +448,6 @@ namespace HardwareManagementSystem
         {
             try
             {
-                // validation 
                 string finalName = TxtInvName.Text.Trim();
                 if (string.IsNullOrWhiteSpace(finalName) || string.IsNullOrWhiteSpace(CmbInvCategory.Text))
                 {
@@ -403,7 +468,6 @@ namespace HardwareManagementSystem
                     return;
                 }
 
-                // If adding a new Batch/Product, validate Batch fields
                 bool isNewProduct = string.IsNullOrEmpty(HiddenInvProductID.Text);
                 decimal costPrice = 0;
                 decimal batchQty = 0;
@@ -462,14 +526,14 @@ namespace HardwareManagementSystem
                     string paymentMethod = ((ComboBoxItem)CmbInvPaymentType.SelectedItem).Content.ToString();
                     decimal totalBatchCost = b.InitialQuantity * b.CostPrice;
 
-                    using (SqlConnection con = new SqlConnection(connString))
+                    using (SQLiteConnection con = new SQLiteConnection(connString))
                     {
                         con.Open();
-                        new SqlCommand($"UPDATE Batch SET SupplierID = {supplierId} WHERE BatchNumber = '{b.BatchNumber}'", con).ExecuteNonQuery();
+                        new SQLiteCommand($"UPDATE Batch SET SupplierID = {supplierId} WHERE BatchNumber = '{b.BatchNumber}'", con).ExecuteNonQuery();
 
                         if (paymentMethod.Contains("Credit"))
                         {
-                            try { new SqlCommand($"UPDATE Supplier SET OutstandingBalance = ISNULL(OutstandingBalance, 0) + {totalBatchCost} WHERE SupplierID = {supplierId}", con).ExecuteNonQuery(); } catch { }
+                            try { new SQLiteCommand($"UPDATE Supplier SET OutstandingBalance = IFNULL(OutstandingBalance, 0) + {totalBatchCost} WHERE SupplierID = {supplierId}", con).ExecuteNonQuery(); } catch { }
                         }
                     }
                 }
@@ -483,11 +547,11 @@ namespace HardwareManagementSystem
             catch (Exception ex) { MessageBox.Show("Error saving product: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
-        private void BtnDeleteInventory_Click(object sender, RoutedEventArgs e) { if (DgdInventory.SelectedItem is DataRowView row && MessageBox.Show("Delete this item?", "Confirm", MessageBoxButton.YesNo) == MessageBoxResult.Yes) { using (SqlConnection con = new SqlConnection(connString)) { con.Open(); new SqlCommand($"UPDATE Product SET IsActive = 0 WHERE ProductID = {row["ProductID"]}", con).ExecuteNonQuery(); } LoadInventory(); RefreshDashboard(); } }
+        private void BtnDeleteInventory_Click(object sender, RoutedEventArgs e) { if (DgdInventory.SelectedItem is DataRowView row && MessageBox.Show("Delete this item?", "Confirm", MessageBoxButton.YesNo) == MessageBoxResult.Yes) { using (SQLiteConnection con = new SQLiteConnection(connString)) { con.Open(); new SQLiteCommand($"UPDATE Product SET IsActive = 0 WHERE ProductID = {row["ProductID"]}", con).ExecuteNonQuery(); } LoadInventory(); RefreshDashboard(); } }
         private void BtnCloseInventoryModal_Click(object sender, RoutedEventArgs e) => InventoryModalOverlay.Visibility = Visibility.Collapsed;
         private void BtnBrowseImage_Click(object sender, RoutedEventArgs e) { OpenFileDialog op = new OpenFileDialog(); if (op.ShowDialog() == true) { ImgProductPreview.Source = new BitmapImage(new Uri(op.FileName)); HiddenImagePath.Text = op.FileName; } }
 
-        // restock 
+        // RESTOCK LOGIC
         private void BtnOpenRestock_Click(object sender, RoutedEventArgs e) { CmbRestockProduct.ItemsSource = FetchData("SELECT ProductID, Name, CurrentSellingPrice FROM Product WHERE IsActive = 1 ORDER BY Name").DefaultView; CmbRestockSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; TxtRestockBatchNo.Text = "GRN-" + DateTime.Now.ToString("yyyyMMdd-HHmm"); TxtRestockQty.Clear(); TxtRestockCost.Clear(); TxtRestockSellingPrice.Clear(); RestockModalOverlay.Visibility = Visibility.Visible; }
         private void BtnCloseRestock_Click(object sender, RoutedEventArgs e) { RestockModalOverlay.Visibility = Visibility.Collapsed; }
         private void CmbRestockProduct_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (CmbRestockProduct.SelectedItem is DataRowView row) { TxtRestockSellingPrice.Text = row["CurrentSellingPrice"].ToString(); } }
@@ -512,14 +576,14 @@ namespace HardwareManagementSystem
                 string paymentMethod = ((ComboBoxItem)CmbRestockPaymentType.SelectedItem).Content.ToString();
                 decimal totalBatchCost = qty * costPrice;
 
-                using (SqlConnection con = new SqlConnection(connString))
+                using (SQLiteConnection con = new SQLiteConnection(connString))
                 {
                     con.Open();
-                    SqlTransaction transaction = con.BeginTransaction();
+                    SQLiteTransaction transaction = con.BeginTransaction();
                     try
                     {
-                        string insertBatch = "INSERT INTO Batch (BatchNumber, CostPrice, InitialQuantity, CurrentQuantity, ManufacturingDate, ProductID, SupplierID) VALUES (@BN, @Cost, @Qty, @Qty, GETDATE(), @PID, @SID)";
-                        SqlCommand cmdBatch = new SqlCommand(insertBatch, con, transaction);
+                        string insertBatch = "INSERT INTO Batch (BatchNumber, CostPrice, InitialQuantity, CurrentQuantity, ManufacturingDate, ProductID, SupplierID) VALUES (@BN, @Cost, @Qty, @Qty, CURRENT_TIMESTAMP, @PID, @SID)";
+                        SQLiteCommand cmdBatch = new SQLiteCommand(insertBatch, con, transaction);
                         cmdBatch.Parameters.AddWithValue("@BN", TxtRestockBatchNo.Text);
                         cmdBatch.Parameters.AddWithValue("@Cost", costPrice);
                         cmdBatch.Parameters.AddWithValue("@Qty", qty);
@@ -528,19 +592,19 @@ namespace HardwareManagementSystem
                         cmdBatch.ExecuteNonQuery();
 
                         string updatePrice = "UPDATE Product SET CurrentSellingPrice = @NewPrice WHERE ProductID = @PID";
-                        SqlCommand cmdPrice = new SqlCommand(updatePrice, con, transaction);
+                        SQLiteCommand cmdPrice = new SQLiteCommand(updatePrice, con, transaction);
                         cmdPrice.Parameters.AddWithValue("@NewPrice", newSellingPrice);
                         cmdPrice.Parameters.AddWithValue("@PID", productId);
                         cmdPrice.ExecuteNonQuery();
 
                         if (paymentMethod.Contains("Credit"))
                         {
-                            try { string updateDebt = "UPDATE Supplier SET OutstandingBalance = ISNULL(OutstandingBalance, 0) + @AddedDebt WHERE SupplierID = @SID"; SqlCommand cmdDebt = new SqlCommand(updateDebt, con, transaction); cmdDebt.Parameters.AddWithValue("@AddedDebt", totalBatchCost); cmdDebt.Parameters.AddWithValue("@SID", supplierId); cmdDebt.ExecuteNonQuery(); } catch { }
+                            try { string updateDebt = "UPDATE Supplier SET OutstandingBalance = IFNULL(OutstandingBalance, 0) + @AddedDebt WHERE SupplierID = @SID"; SQLiteCommand cmdDebt = new SQLiteCommand(updateDebt, con, transaction); cmdDebt.Parameters.AddWithValue("@AddedDebt", totalBatchCost); cmdDebt.Parameters.AddWithValue("@SID", supplierId); cmdDebt.ExecuteNonQuery(); } catch { }
                         }
 
                         string productName = ((DataRowView)CmbRestockProduct.SelectedItem)["Name"].ToString();
                         string auditLog = "INSERT INTO AuditLog (StaffID, ActionType, Description) VALUES (@UID, 'RESTOCK', @Desc)";
-                        SqlCommand cmdAudit = new SqlCommand(auditLog, con, transaction);
+                        SQLiteCommand cmdAudit = new SQLiteCommand(auditLog, con, transaction);
                         cmdAudit.Parameters.AddWithValue("@UID", loggedInStaffID);
                         cmdAudit.Parameters.AddWithValue("@Desc", $"Added {qty} units to {productName}. Cost: {costPrice}, Sell Price: {newSellingPrice}");
                         cmdAudit.ExecuteNonQuery();
@@ -558,9 +622,8 @@ namespace HardwareManagementSystem
             catch (Exception ex) { MessageBox.Show("Error processing restock: " + ex.Message, "System Error", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
-        // supplier manament logic 
-
-        private void LoadSuppliers() { if (DgdSuppliers != null) { try { DgdSuppliers.ItemsSource = FetchData("SELECT SupplierID, SupplierName, CompanyName, Phone, Category, ISNULL(OutstandingBalance, 0) AS OutstandingBalance FROM Supplier ORDER BY SupplierName").DefaultView; } catch { DgdSuppliers.ItemsSource = FetchData("SELECT SupplierID, SupplierName, CompanyName, Phone, Category, 0.00 AS OutstandingBalance FROM Supplier ORDER BY SupplierName").DefaultView; } } }
+        // SUPPLIER MANAGEMENT LOGIC 
+        private void LoadSuppliers() { if (DgdSuppliers != null) { try { DgdSuppliers.ItemsSource = FetchData("SELECT SupplierID, SupplierName, CompanyName, Phone, Category, IFNULL(OutstandingBalance, 0) AS OutstandingBalance FROM Supplier ORDER BY SupplierName").DefaultView; } catch { DgdSuppliers.ItemsSource = FetchData("SELECT SupplierID, SupplierName, CompanyName, Phone, Category, 0.00 AS OutstandingBalance FROM Supplier ORDER BY SupplierName").DefaultView; } } }
 
         private void BtnQuickAddSupplier_Click(object sender, RoutedEventArgs e)
         {
@@ -597,10 +660,10 @@ namespace HardwareManagementSystem
                 {
                     try
                     {
-                        using (SqlConnection con = new SqlConnection(connString))
+                        using (SQLiteConnection con = new SQLiteConnection(connString))
                         {
                             con.Open();
-                            new SqlCommand($"DELETE FROM Supplier WHERE SupplierID = {row["SupplierID"]}", con).ExecuteNonQuery();
+                            new SQLiteCommand($"DELETE FROM Supplier WHERE SupplierID = {row["SupplierID"]}", con).ExecuteNonQuery();
                         }
                         LoadSuppliers();
                         MessageBox.Show("Supplier deleted successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -625,13 +688,13 @@ namespace HardwareManagementSystem
 
             try
             {
-                using (SqlConnection con = new SqlConnection(connString))
+                using (SQLiteConnection con = new SQLiteConnection(connString))
                 {
                     con.Open();
                     if (string.IsNullOrEmpty(HiddenSupplierFormID.Text))
                     {
                         string query = "INSERT INTO Supplier (SupplierName, CompanyName, Phone, Address, Category, OutstandingBalance) VALUES (@Name, @Company, @Phone, 'N/A', 'General', @Bal)";
-                        SqlCommand cmd = new SqlCommand(query, con);
+                        SQLiteCommand cmd = new SQLiteCommand(query, con);
                         cmd.Parameters.AddWithValue("@Name", supplierName);
                         cmd.Parameters.AddWithValue("@Company", companyName);
                         cmd.Parameters.AddWithValue("@Phone", TxtQuickSupplierPhone.Text.Trim());
@@ -642,7 +705,7 @@ namespace HardwareManagementSystem
                     else
                     {
                         string query = "UPDATE Supplier SET SupplierName=@Name, CompanyName=@Company, Phone=@Phone WHERE SupplierID=@ID";
-                        SqlCommand cmd = new SqlCommand(query, con);
+                        SQLiteCommand cmd = new SQLiteCommand(query, con);
                         cmd.Parameters.AddWithValue("@Name", supplierName);
                         cmd.Parameters.AddWithValue("@Company", companyName);
                         cmd.Parameters.AddWithValue("@Phone", TxtQuickSupplierPhone.Text.Trim());
@@ -670,20 +733,20 @@ namespace HardwareManagementSystem
                     TxtStockModalSupplierName.Text = "Stock from: " + row["SupplierName"].ToString();
 
                     DataTable dt = new DataTable();
-                    using (SqlConnection con = new SqlConnection(connString))
+                    using (SQLiteConnection con = new SQLiteConnection(connString))
                     {
                         con.Open();
 
                         string query = $@"
-                            SELECT p.Name as ProductName, ISNULL(SUM(b.CurrentQuantity), 0) as TotalStockLeft, p.SellingUnit 
+                            SELECT p.Name as ProductName, IFNULL(SUM(b.CurrentQuantity), 0) as TotalStockLeft, p.SellingUnit 
                             FROM Batch b 
                             JOIN Product p ON b.ProductID = p.ProductID 
                             WHERE b.SupplierID = {supplierId} AND b.CurrentQuantity > 0 
                             GROUP BY p.Name, p.SellingUnit";
 
-                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        using (SQLiteCommand cmd = new SQLiteCommand(query, con))
                         {
-                            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                            using (SQLiteDataAdapter da = new SQLiteDataAdapter(cmd))
                             {
                                 da.Fill(dt);
                             }
@@ -718,15 +781,15 @@ namespace HardwareManagementSystem
 
             try
             {
-                using (SqlConnection con = new SqlConnection(connString))
+                using (SQLiteConnection con = new SQLiteConnection(connString))
                 {
                     con.Open();
-                    SqlTransaction trans = con.BeginTransaction();
+                    SQLiteTransaction trans = con.BeginTransaction();
                     try
                     {
-                        new SqlCommand($"UPDATE Supplier SET OutstandingBalance -= {paying} WHERE SupplierID = {HiddenSupplierPayID.Text}", con, trans).ExecuteNonQuery();
+                        new SQLiteCommand($"UPDATE Supplier SET OutstandingBalance = OutstandingBalance - {paying} WHERE SupplierID = {HiddenSupplierPayID.Text}", con, trans).ExecuteNonQuery();
                         string auditLog = "INSERT INTO AuditLog (StaffID, ActionType, Description) VALUES (@UID, 'PAYMENT', @Desc)";
-                        SqlCommand cmdAudit = new SqlCommand(auditLog, con, trans);
+                        SQLiteCommand cmdAudit = new SQLiteCommand(auditLog, con, trans);
                         cmdAudit.Parameters.AddWithValue("@UID", loggedInStaffID);
                         cmdAudit.Parameters.AddWithValue("@Desc", $"Paid LKR {paying} to Supplier ID {HiddenSupplierPayID.Text}");
                         cmdAudit.ExecuteNonQuery();
@@ -746,10 +809,10 @@ namespace HardwareManagementSystem
         private void TxtSupplierAmountPaying_TextChanged(object sender, TextChangedEventArgs e) { try { decimal total = decimal.Parse(TxtSettleSupplierTotalAmount.Text.Replace("LKR ", "")); decimal paying = string.IsNullOrEmpty(TxtSupplierAmountPaying.Text) ? 0 : decimal.Parse(TxtSupplierAmountPaying.Text); TxtSupplierRemainingBalance.Text = $"Balance After: LKR {(total - paying):N2}"; } catch { } }
         private void BtnOpenAdjustDebt_Click(object sender, RoutedEventArgs e) { CmbAdjustDebtSupplier.ItemsSource = FetchData("SELECT SupplierID, SupplierName FROM Supplier ORDER BY SupplierName").DefaultView; TxtNewSupplierDebt.Clear(); AdjustSupplierDebtOverlay.Visibility = Visibility.Visible; }
         private void BtnCancelAdjustDebt_Click(object sender, RoutedEventArgs e) { AdjustSupplierDebtOverlay.Visibility = Visibility.Collapsed; }
-        private void CmbAdjustDebtSupplier_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (CmbAdjustDebtSupplier.SelectedItem is DataRowView row) { try { int supplierId = Convert.ToInt32(row["SupplierID"]); using (SqlConnection con = new SqlConnection(connString)) { con.Open(); var result = new SqlCommand($"SELECT OutstandingBalance FROM Supplier WHERE SupplierID = {supplierId}", con).ExecuteScalar(); if (result != DBNull.Value && result != null) { TxtNewSupplierDebt.Text = Convert.ToDecimal(result).ToString("0.00"); } } } catch { } } }
-        private void BtnSaveAdjustDebt_Click(object sender, RoutedEventArgs e) { if (CmbAdjustDebtSupplier.SelectedValue == null || !decimal.TryParse(TxtNewSupplierDebt.Text, out decimal newDebt)) { MessageBox.Show("Please select a supplier and enter a valid debt amount.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning); return; } try { int supplierId = Convert.ToInt32(CmbAdjustDebtSupplier.SelectedValue); using (SqlConnection con = new SqlConnection(connString)) { con.Open(); new SqlCommand($"UPDATE Supplier SET OutstandingBalance = {newDebt} WHERE SupplierID = {supplierId}", con).ExecuteNonQuery(); } AdjustSupplierDebtOverlay.Visibility = Visibility.Collapsed; LoadSuppliers(); RefreshDashboard(); MessageBox.Show("Supplier debt adjusted successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information); } catch (Exception ex) { MessageBox.Show("Error adjusting debt: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); } }
+        private void CmbAdjustDebtSupplier_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (CmbAdjustDebtSupplier.SelectedItem is DataRowView row) { try { int supplierId = Convert.ToInt32(row["SupplierID"]); using (SQLiteConnection con = new SQLiteConnection(connString)) { con.Open(); var result = new SQLiteCommand($"SELECT OutstandingBalance FROM Supplier WHERE SupplierID = {supplierId}", con).ExecuteScalar(); if (result != DBNull.Value && result != null) { TxtNewSupplierDebt.Text = Convert.ToDecimal(result).ToString("0.00"); } } } catch { } } }
+        private void BtnSaveAdjustDebt_Click(object sender, RoutedEventArgs e) { if (CmbAdjustDebtSupplier.SelectedValue == null || !decimal.TryParse(TxtNewSupplierDebt.Text, out decimal newDebt)) { MessageBox.Show("Please select a supplier and enter a valid debt amount.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning); return; } try { int supplierId = Convert.ToInt32(CmbAdjustDebtSupplier.SelectedValue); using (SQLiteConnection con = new SQLiteConnection(connString)) { con.Open(); new SQLiteCommand($"UPDATE Supplier SET OutstandingBalance = {newDebt} WHERE SupplierID = {supplierId}", con).ExecuteNonQuery(); } AdjustSupplierDebtOverlay.Visibility = Visibility.Collapsed; LoadSuppliers(); RefreshDashboard(); MessageBox.Show("Supplier debt adjusted successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information); } catch (Exception ex) { MessageBox.Show("Error adjusting debt: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); } }
 
-        // debotor manamnet 
+        // DEBTOR MANAGEMENT LOGIC
         private void LoadDebtors() { DgdDebtors.ItemsSource = FetchData("SELECT * FROM Debtor").DefaultView; }
         private void BtnOpenSettleDebt_Click(object sender, RoutedEventArgs e) { if (DgdDebtors.SelectedItem is DataRowView row) { HiddenDebtorID.Text = row["DebtorID"].ToString(); TxtSettleCustomerName.Text = row["Name"].ToString(); TxtSettleTotalAmount.Text = $"LKR {Convert.ToDecimal(row["TotalOutstandingAmount"]):N2}"; TxtAmountPaying.Clear(); TxtRemainingBalance.Text = "Balance After: LKR 0.00"; SettleDebtOverlay.Visibility = Visibility.Visible; } }
 
@@ -763,10 +826,10 @@ namespace HardwareManagementSystem
 
             try
             {
-                using (SqlConnection con = new SqlConnection(connString))
+                using (SQLiteConnection con = new SQLiteConnection(connString))
                 {
                     con.Open();
-                    new SqlCommand($"UPDATE Debtor SET TotalOutstandingAmount -= {paying} WHERE DebtorID = {HiddenDebtorID.Text}", con).ExecuteNonQuery();
+                    new SQLiteCommand($"UPDATE Debtor SET TotalOutstandingAmount = TotalOutstandingAmount - {paying} WHERE DebtorID = {HiddenDebtorID.Text}", con).ExecuteNonQuery();
                 }
                 SettleDebtOverlay.Visibility = Visibility.Collapsed;
                 LoadDebtors();
@@ -778,15 +841,15 @@ namespace HardwareManagementSystem
         private void BtnCancelSettle_Click(object sender, RoutedEventArgs e) => SettleDebtOverlay.Visibility = Visibility.Collapsed;
         private void TxtAmountPaying_TextChanged(object sender, TextChangedEventArgs e) { try { decimal total = decimal.Parse(TxtSettleTotalAmount.Text.Replace("LKR ", "")); decimal paying = string.IsNullOrEmpty(TxtAmountPaying.Text) ? 0 : decimal.Parse(TxtAmountPaying.Text); TxtRemainingBalance.Text = $"Balance After: LKR {(total - paying):N2}"; } catch { } }
 
-        // sales history manament 
-        private void LoadSales() { string query = "SELECT b.*, s.FullName as StaffName FROM Bill b JOIN Staff s ON b.StaffID = s.StaffID WHERE 1=1 "; if (DpSalesFrom != null && DpSalesFrom.SelectedDate.HasValue) query += $" AND b.Date >= '{DpSalesFrom.SelectedDate.Value:yyyy-MM-dd}' "; if (DpSalesTo != null && DpSalesTo.SelectedDate.HasValue) query += $" AND b.Date <= '{DpSalesTo.SelectedDate.Value:yyyy-MM-dd}' "; query += " ORDER BY b.Date DESC, b.Time DESC"; if (DgdSales != null) DgdSales.ItemsSource = FetchData(query).DefaultView; }
+        // SALES HISTORY LOGIC
+        private void LoadSales() { string query = "SELECT b.*, s.FullName as StaffName FROM Bill b JOIN Staff s ON b.StaffID = s.StaffID WHERE 1=1 "; if (DpSalesFrom != null && DpSalesFrom.SelectedDate.HasValue) query += $" AND date(b.Date) >= '{DpSalesFrom.SelectedDate.Value:yyyy-MM-dd}' "; if (DpSalesTo != null && DpSalesTo.SelectedDate.HasValue) query += $" AND date(b.Date) <= '{DpSalesTo.SelectedDate.Value:yyyy-MM-dd}' "; query += " ORDER BY date(b.Date) DESC, b.Time DESC"; if (DgdSales != null) DgdSales.ItemsSource = FetchData(query).DefaultView; }
         private void BtnFilterSalesHistory_Click(object sender, RoutedEventArgs e) { LoadSales(); }
         private void BtnViewBill_Click(object sender, RoutedEventArgs e) { if (DgdSales.SelectedItem is DataRowView row) { TxtReceiptBillID.Text = "#" + row["BillID"].ToString(); DateTime date = Convert.ToDateTime(row["Date"]); TxtReceiptDate.Text = date.ToString("dd/MM/yyyy") + " " + row["Time"].ToString(); TxtReceiptTotal.Text = Convert.ToDecimal(row["GrandTotal"]).ToString("N2"); TxtReceiptCash.Text = row["PaymentType"].ToString(); string query = $"SELECT p.Name as ProductName, bi.QuantitySold as Quantity, (bi.SellingPriceAtTimeOfSale * bi.QuantitySold) as TotalPrice FROM Bill_Item bi JOIN Product p ON bi.ProductID = p.ProductID WHERE bi.BillID = {row["BillID"]}"; IcBillItems.ItemsSource = FetchData(query).DefaultView; BillViewerOverlay.Visibility = Visibility.Visible; } }
         private void BtnPrintBill_Click(object sender, RoutedEventArgs e) { try { PrintDialog printDlg = new PrintDialog(); if (printDlg.ShowDialog() == true) { BillActionGrid.Visibility = Visibility.Collapsed; printDlg.PrintVisual(ManagerReceiptPaper, "Receipt Copy"); BillActionGrid.Visibility = Visibility.Visible; } } catch (Exception ex) { BillActionGrid.Visibility = Visibility.Visible; MessageBox.Show("Print Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); } }
         private void BtnCloseBill_Click(object sender, RoutedEventArgs e) => BillViewerOverlay.Visibility = Visibility.Collapsed;
         private void CmbStaffFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) { LoadSales(); }
 
-        // setting and dashboard logic 
+        // SETTINGS & DASHBOARD LOGIC
         private void BtnCloseSettings_Click(object sender, RoutedEventArgs e) { SettingsModalOverlay.Visibility = Visibility.Collapsed; }
         private void BtnSaveSettings_Click(object sender, RoutedEventArgs e) { try { if (decimal.TryParse(TxtDailyGoal.Text, out decimal newGoal)) { _dailyGoal = newGoal; } } catch { } string selectedTheme = ((ComboBoxItem)CmbTheme.SelectedItem).Content.ToString(); if (selectedTheme == "Dark Mode") { this.Resources["AppBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F172A")); this.Resources["CardBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E293B")); this.Resources["TextMain"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F8FAFC")); this.Resources["TextMuted"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8")); } else { this.Resources["AppBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F1F5F9")); this.Resources["CardBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF")); this.Resources["TextMain"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F172A")); this.Resources["TextMuted"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#64748B")); } SettingsModalOverlay.Visibility = Visibility.Collapsed; RefreshDashboard(); MessageBox.Show("Settings saved and applied successfully!", "Settings Updated", MessageBoxButton.OK, MessageBoxImage.Information); }
         private void BtnBackupDB_Click(object sender, RoutedEventArgs e) { MessageBox.Show("Database backup initiated securely.", "Backup Status", MessageBoxButton.OK, MessageBoxImage.Information); }
@@ -795,19 +858,19 @@ namespace HardwareManagementSystem
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(connString))
+                using (SQLiteConnection con = new SQLiteConnection(connString))
                 {
                     con.Open();
-                    decimal totalItems = Convert.ToDecimal(new SqlCommand("SELECT ISNULL(SUM(CurrentQuantity),0) FROM Batch", con).ExecuteScalar());
+                    decimal totalItems = Convert.ToDecimal(new SQLiteCommand("SELECT IFNULL(SUM(CurrentQuantity),0) FROM Batch", con).ExecuteScalar());
                     if (TxtTotalItems != null) TxtTotalItems.Text = totalItems.ToString("0.##");
-                    try { var payable = new SqlCommand("SELECT ISNULL(SUM(OutstandingBalance),0) FROM Supplier", con).ExecuteScalar(); if (TxtTotalPayable != null) TxtTotalPayable.Text = $"LKR {Convert.ToDecimal(payable):N2}"; } catch { if (TxtTotalPayable != null) TxtTotalPayable.Text = "LKR 0.00"; }
-                    decimal rev = Convert.ToDecimal(new SqlCommand("SELECT ISNULL(SUM(GrandTotal),0) FROM Bill WHERE Date=CAST(GETDATE() AS DATE) AND Status='Completed'", con).ExecuteScalar());
+                    try { var payable = new SQLiteCommand("SELECT IFNULL(SUM(OutstandingBalance),0) FROM Supplier", con).ExecuteScalar(); if (TxtTotalPayable != null) TxtTotalPayable.Text = $"LKR {Convert.ToDecimal(payable):N2}"; } catch { if (TxtTotalPayable != null) TxtTotalPayable.Text = "LKR 0.00"; }
+                    decimal rev = Convert.ToDecimal(new SQLiteCommand("SELECT IFNULL(SUM(GrandTotal),0) FROM Bill WHERE date(Date)=CURRENT_DATE AND Status='Completed'", con).ExecuteScalar());
                     if (TxtTodayRevenue != null) TxtTodayRevenue.Text = $"LKR {rev:N2}";
                     if (ProgDailyGoal != null) { ProgDailyGoal.Maximum = (double)_dailyGoal; ProgDailyGoal.Value = (double)rev; decimal percent = (_dailyGoal > 0) ? (rev / _dailyGoal) * 100 : 0; if (TxtGoalProgress != null) TxtGoalProgress.Text = $"{percent:N1}% of Daily Target (LKR {_dailyGoal:N0})"; }
-                    if (TxtTotalTransactions != null) TxtTotalTransactions.Text = new SqlCommand("SELECT COUNT(*) FROM Bill WHERE Date=CAST(GETDATE() AS DATE)", con).ExecuteScalar().ToString();
+                    if (TxtTotalTransactions != null) TxtTotalTransactions.Text = new SQLiteCommand("SELECT COUNT(*) FROM Bill WHERE date(Date)=CURRENT_DATE", con).ExecuteScalar().ToString();
                 }
 
-                if (DgdHomeInventory != null) DgdHomeInventory.ItemsSource = FetchData("SELECT TOP 10 Name, TotalQuantity, SellingUnit FROM Product WHERE IsActive=1 ORDER BY TotalQuantity DESC").DefaultView;
+                if (DgdHomeInventory != null) DgdHomeInventory.ItemsSource = FetchData("SELECT p.Name, IFNULL(SUM(b.CurrentQuantity),0) AS TotalQuantity, p.SellingUnit FROM Product p LEFT JOIN Batch b ON p.ProductID = b.ProductID WHERE p.IsActive=1 GROUP BY p.ProductID, p.Name, p.SellingUnit ORDER BY TotalQuantity DESC LIMIT 10").DefaultView;
                 DataTable dtLowStock = _inventoryService.GetLowStockItems();
                 if (DgdLowStock != null) DgdLowStock.ItemsSource = dtLowStock.DefaultView;
                 int lowStockCount = dtLowStock.Rows.Count;
@@ -820,7 +883,7 @@ namespace HardwareManagementSystem
         private DataTable FetchData(string query)
         {
             DataTable dt = new DataTable();
-            try { using (SqlConnection con = new SqlConnection(connString)) { new SqlDataAdapter(query, con).Fill(dt); } } catch { }
+            try { using (SQLiteConnection con = new SQLiteConnection(connString)) { new SQLiteDataAdapter(query, con).Fill(dt); } } catch { }
             return dt;
         }
     }

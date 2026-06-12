@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Configuration;
 using System.Linq;
 using System.Windows;
@@ -47,19 +47,19 @@ namespace HardwareManagementSystem
             {
                 AllProducts.Clear();
                 string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
-                using (SqlConnection con = new SqlConnection(connectionString))
+                using (SQLiteConnection con = new SQLiteConnection(connectionString))
                 {
                     con.Open();
                     string query = @"
                         SELECT p.ProductID, p.Name, p.CurrentSellingPrice, p.Category, p.SubCategory, p.SellingUnit, p.ImagePath, 
-                               ISNULL(SUM(b.CurrentQuantity), 0) AS TotalQuantity 
+                               IFNULL(SUM(b.CurrentQuantity), 0) AS TotalQuantity 
                         FROM Product p 
                         LEFT JOIN Batch b ON p.ProductID = b.ProductID 
                         WHERE p.IsActive = 1 
                         GROUP BY p.ProductID, p.Name, p.CurrentSellingPrice, p.Category, p.SubCategory, p.SellingUnit, p.ImagePath";
 
-                    SqlCommand cmd = new SqlCommand(query, con);
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    SQLiteCommand cmd = new SQLiteCommand(query, con);
+                    SQLiteDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
@@ -84,6 +84,7 @@ namespace HardwareManagementSystem
                 MessageBox.Show("Database Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void PopulateFilterCheckboxes()
         {
             if (SpCategories == null) return;
@@ -550,15 +551,15 @@ namespace HardwareManagementSystem
             int debtorId = 0;
             string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (SQLiteConnection con = new SQLiteConnection(connectionString))
             {
                 con.Open();
-                SqlTransaction transaction = con.BeginTransaction();
+                SQLiteTransaction transaction = con.BeginTransaction();
 
                 try
                 {
                     string checkDebtorQuery = "SELECT DebtorID FROM Debtor WHERE Phone = @Phone";
-                    SqlCommand checkCmd = new SqlCommand(checkDebtorQuery, con, transaction);
+                    SQLiteCommand checkCmd = new SQLiteCommand(checkDebtorQuery, con, transaction);
                     checkCmd.Parameters.AddWithValue("@Phone", phone);
                     object result = checkCmd.ExecuteScalar();
 
@@ -566,15 +567,15 @@ namespace HardwareManagementSystem
                     {
                         debtorId = Convert.ToInt32(result);
                         string updateDebtorQuery = "UPDATE Debtor SET TotalOutstandingAmount = TotalOutstandingAmount + @Amount WHERE DebtorID = @DebtorID";
-                        SqlCommand updateCmd = new SqlCommand(updateDebtorQuery, con, transaction);
+                        SQLiteCommand updateCmd = new SQLiteCommand(updateDebtorQuery, con, transaction);
                         updateCmd.Parameters.AddWithValue("@Amount", currentGrandTotal);
                         updateCmd.Parameters.AddWithValue("@DebtorID", debtorId);
                         updateCmd.ExecuteNonQuery();
                     }
                     else
                     {
-                        string insertDebtorQuery = "INSERT INTO Debtor (Name, Phone, Address, TotalOutstandingAmount, StaffID) VALUES (@Name, @Phone, @Address, @Amount, @StaffID); SELECT SCOPE_IDENTITY();";
-                        SqlCommand insertCmd = new SqlCommand(insertDebtorQuery, con, transaction);
+                        string insertDebtorQuery = "INSERT INTO Debtor (Name, Phone, Address, TotalOutstandingAmount, StaffID) VALUES (@Name, @Phone, @Address, @Amount, @StaffID); SELECT last_insert_rowid();";
+                        SQLiteCommand insertCmd = new SQLiteCommand(insertDebtorQuery, con, transaction);
                         insertCmd.Parameters.AddWithValue("@Name", name);
                         insertCmd.Parameters.AddWithValue("@Phone", phone);
                         insertCmd.Parameters.AddWithValue("@Address", address);
@@ -584,8 +585,8 @@ namespace HardwareManagementSystem
                     }
 
                     string insertDebtTransQuery = "INSERT INTO Debt_Transaction (Date, Type, Amount, DebtorID, StaffID) VALUES (@Date, 'Credit Added', @Amount, @DebtorID, @StaffID)";
-                    SqlCommand transCmd = new SqlCommand(insertDebtTransQuery, con, transaction);
-                    transCmd.Parameters.AddWithValue("@Date", DateTime.Now.Date);
+                    SQLiteCommand transCmd = new SQLiteCommand(insertDebtTransQuery, con, transaction);
+                    transCmd.Parameters.AddWithValue("@Date", DateTime.Now.ToString("yyyy-MM-dd"));
                     transCmd.Parameters.AddWithValue("@Amount", currentGrandTotal);
                     transCmd.Parameters.AddWithValue("@DebtorID", debtorId);
                     transCmd.Parameters.AddWithValue("@StaffID", loggedInStaffID);
@@ -608,21 +609,21 @@ namespace HardwareManagementSystem
         private void ProcessTransaction(string paymentType, int? debtorId, decimal cashGiven)
         {
             string connectionString = ConfigurationManager.ConnectionStrings["HardwareDBConnection"].ConnectionString;
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (SQLiteConnection con = new SQLiteConnection(connectionString))
             {
                 con.Open();
-                SqlTransaction transaction = con.BeginTransaction();
+                SQLiteTransaction transaction = con.BeginTransaction();
 
                 try
                 {
                     string insertBillQuery = @"
                         INSERT INTO Bill (Date, Time, SubTotal, BillDiscount, GrandTotal, PaymentType, Status, StaffID, DebtorID) 
                         VALUES (@Date, @Time, @SubTotal, @BillDiscount, @GrandTotal, @PaymentType, @Status, @StaffID, @DebtorID);
-                        SELECT SCOPE_IDENTITY();";
+                        SELECT last_insert_rowid();";
 
-                    SqlCommand billCmd = new SqlCommand(insertBillQuery, con, transaction);
-                    billCmd.Parameters.AddWithValue("@Date", DateTime.Now.Date);
-                    billCmd.Parameters.AddWithValue("@Time", DateTime.Now.TimeOfDay);
+                    SQLiteCommand billCmd = new SQLiteCommand(insertBillQuery, con, transaction);
+                    billCmd.Parameters.AddWithValue("@Date", DateTime.Now.ToString("yyyy-MM-dd"));
+                    billCmd.Parameters.AddWithValue("@Time", DateTime.Now.ToString("HH:mm:ss"));
                     billCmd.Parameters.AddWithValue("@SubTotal", currentSubTotal);
                     billCmd.Parameters.AddWithValue("@BillDiscount", currentBillDiscount);
                     billCmd.Parameters.AddWithValue("@GrandTotal", currentGrandTotal);
@@ -643,23 +644,23 @@ namespace HardwareManagementSystem
 
                         if (currentProductId < 0)
                         {
-                            string createDummyProd = "INSERT INTO Product (Name, Category, Brand, CurrentSellingPrice, TotalQuantity, ReorderLevel, IsActive, StaffID) VALUES (@n, 'Custom Item', 'Manual Entry', @p, 0, 0, 0, @sid); SELECT SCOPE_IDENTITY();";
-                            SqlCommand dummyProdCmd = new SqlCommand(createDummyProd, con, transaction);
+                            string createDummyProd = "INSERT INTO Product (Name, Category, Brand, CurrentSellingPrice, TotalQuantity, ReorderLevel, IsActive, StaffID) VALUES (@n, 'Custom Item', 'Manual Entry', @p, 0, 0, 0, @sid); SELECT last_insert_rowid();";
+                            SQLiteCommand dummyProdCmd = new SQLiteCommand(createDummyProd, con, transaction);
                             dummyProdCmd.Parameters.AddWithValue("@n", item.ProductName);
                             dummyProdCmd.Parameters.AddWithValue("@p", item.UnitPrice);
                             dummyProdCmd.Parameters.AddWithValue("@sid", loggedInStaffID);
                             currentProductId = Convert.ToInt32(dummyProdCmd.ExecuteScalar());
 
-                            string createDummyBatch = "INSERT INTO Batch (BatchNumber, CostPrice, InitialQuantity, CurrentQuantity, ManufacturingDate, ProductID, SupplierID) VALUES ('MANUAL', @p, 0, 0, GETDATE(), @pid, 1); SELECT SCOPE_IDENTITY();";
-                            SqlCommand dummyBatchCmd = new SqlCommand(createDummyBatch, con, transaction);
+                            string createDummyBatch = "INSERT INTO Batch (BatchNumber, CostPrice, InitialQuantity, CurrentQuantity, ManufacturingDate, ProductID, SupplierID) VALUES ('MANUAL', @p, 0, 0, CURRENT_TIMESTAMP, @pid, 1); SELECT last_insert_rowid();";
+                            SQLiteCommand dummyBatchCmd = new SQLiteCommand(createDummyBatch, con, transaction);
                             dummyBatchCmd.Parameters.AddWithValue("@p", item.UnitPrice);
                             dummyBatchCmd.Parameters.AddWithValue("@pid", currentProductId);
                             batchID = Convert.ToInt32(dummyBatchCmd.ExecuteScalar());
                         }
                         else
                         {
-                            string getBatchQuery = "SELECT TOP 1 BatchID FROM Batch WHERE ProductID = @ProductID AND CurrentQuantity >= @RequiredQty ORDER BY ManufacturingDate ASC";
-                            SqlCommand batchCmd = new SqlCommand(getBatchQuery, con, transaction);
+                            string getBatchQuery = "SELECT BatchID FROM Batch WHERE ProductID = @ProductID AND CurrentQuantity >= @RequiredQty ORDER BY ManufacturingDate ASC LIMIT 1";
+                            SQLiteCommand batchCmd = new SQLiteCommand(getBatchQuery, con, transaction);
                             batchCmd.Parameters.AddWithValue("@ProductID", currentProductId);
                             batchCmd.Parameters.AddWithValue("@RequiredQty", item.Quantity);
                             object batchResult = batchCmd.ExecuteScalar();
@@ -668,13 +669,13 @@ namespace HardwareManagementSystem
                             batchID = Convert.ToInt32(batchResult);
 
                             string updateBatchQuery = "UPDATE Batch SET CurrentQuantity = CurrentQuantity - @Qty WHERE BatchID = @BatchID";
-                            SqlCommand updateCmd = new SqlCommand(updateBatchQuery, con, transaction);
+                            SQLiteCommand updateCmd = new SQLiteCommand(updateBatchQuery, con, transaction);
                             updateCmd.Parameters.AddWithValue("@Qty", item.Quantity);
                             updateCmd.Parameters.AddWithValue("@BatchID", batchID);
                             updateCmd.ExecuteNonQuery();
                         }
 
-                        SqlCommand itemCmd = new SqlCommand(insertBillItemQuery, con, transaction);
+                        SQLiteCommand itemCmd = new SQLiteCommand(insertBillItemQuery, con, transaction);
                         itemCmd.Parameters.AddWithValue("@Qty", item.Quantity);
                         itemCmd.Parameters.AddWithValue("@LineDiscount", item.LineDiscount);
                         itemCmd.Parameters.AddWithValue("@SellingPrice", item.UnitPrice);
@@ -749,8 +750,6 @@ namespace HardwareManagementSystem
             loginWindow.Show();
             this.Close();
         }
-        //jhvuygu y guyfuyhgv vgv
-       
     }
 
     public class VariantDisplayInfo
